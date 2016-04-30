@@ -1,0 +1,9 @@
+name: PocketVote
+main: ProjectInfinity\PocketVote\PocketVote
+version: 1.0.1
+api: [2.0.0]
+author: ProjectInfinity
+permissions:
+  pocketvote.admin:
+    description: "Allows player to manage PocketVote"
+    default: op
