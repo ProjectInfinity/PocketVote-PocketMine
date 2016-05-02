@@ -5,6 +5,7 @@ namespace ProjectInfinity\PocketVote;
 use pocketmine\plugin\PluginBase;
 use ProjectInfinity\PocketVote\cmd\PocketVoteCommand;
 use ProjectInfinity\PocketVote\task\SchedulerTask;
+use ProjectInfinity\PocketVote\util\VoteManager;
 
 class PocketVote extends PluginBase {
 
@@ -15,9 +16,11 @@ class PocketVote extends PluginBase {
     public $secret;
 
     public $cmds;
+    public $cmdos;
     
     public static $cert;
 
+    /** @var VoteManager $voteManager */
     private $voteManager;
 
     public function onEnable() {
@@ -25,7 +28,6 @@ class PocketVote extends PluginBase {
         $this->saveDefaultConfig();
         
         # Save and load certificates.
-        #$this->saveResource('cacert.pem', true);
         self::$cert = $this->getDataFolder().'cacert.pem';
         if(!file_exists(self::$cert)) {
             $curl = curl_init('https://curl.haxx.se/ca/cacert.pem');
@@ -56,7 +58,8 @@ class PocketVote extends PluginBase {
         $this->identity = $this->getConfig()->get('identity', null);
         $this->secret = $this->getConfig()->get('secret', null);
         $this->cmds = $this->getConfig()->getNested('onvote.run-cmd', []);
-        #$this->voteManager = new VoteManager();
+        $this->cmdos = $this->getConfig()->getNested('onvote.online-cmd', []);
+        $this->voteManager = new VoteManager($this);
         $this->getServer()->getCommandMap()->register('pocketvote', new PocketVoteCommand($this));
         $this->getServer()->getPluginManager()->registerEvents(new VoteListener($this), $this);
         $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 1200); # 1200 ticks = 60 seconds.
@@ -65,11 +68,15 @@ class PocketVote extends PluginBase {
     public function onDisable() {
         self::$plugin = null;
         self::$cert = null;
-        unset($this->identity, $this->secret, $this->voteManager, $this->cmds);
+        unset($this->identity, $this->secret, $this->voteManager, $this->cmds, $this->cmdos);
     }
     
     public static function getPlugin(): PocketVote {
         return self::$plugin;
+    }
+    
+    public function getVoteManager(): VoteManager {
+        return $this->voteManager;
     }
 
 }
