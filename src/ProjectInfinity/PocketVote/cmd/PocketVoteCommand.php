@@ -81,11 +81,11 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                             return true;
                         }
                         $i = 0;
-                        foreach($this->plugin->cmds as $cmd) {
+                        foreach($this->plugin->cmds as $key => $cmd) {
                             $i++;
                             if((int) $args[2] > $i) continue;
                             if((int) $args[2] === $i) {
-                                unset($this->plugin->cmds[$i - 1]);
+                                unset($this->plugin->cmds[$key]);
                                 $sender->sendMessage(TextFormat::GREEN.'Deleted '.$cmd.'.');
                                 $this->plugin->getConfig()->setNested('onvote.run-cmd', array_values($this->plugin->cmds));
                                 $this->plugin->saveConfig();
@@ -134,11 +134,11 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                             return true;
                         }
                         $i = 0;
-                        foreach($this->plugin->cmdos as $cmd) {
+                        foreach($this->plugin->cmdos as $key => $cmd) {
                             $i++;
                             if((int) $args[2] > $i) continue;
                             if((int) $args[2] === $i) {
-                                unset($this->plugin->cmdos[$i - 1]);
+                                unset($this->plugin->cmdos[$key]);
                                 $sender->sendMessage(TextFormat::GREEN.'Deleted '.$cmd.'.');
                                 $this->plugin->getConfig()->setNested('onvote.online-cmd', array_values($this->plugin->cmdos));
                                 $this->plugin->saveConfig();
