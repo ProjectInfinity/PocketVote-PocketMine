@@ -126,7 +126,7 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                         if(strpos($args[2], '/') === 0) $args[2] = substr($args[2], 1, strlen($args[2]));
                         $this->plugin->cmdos[] = implode(' ', $args);
                         $sender->sendMessage(TextFormat::GREEN.'Successfully added command.');
-                        $this->plugin->getConfig()->setNested('onvote.online-cmd', array_values($this->plugin->cmds));
+                        $this->plugin->getConfig()->setNested('onvote.online-cmd', array_values($this->plugin->cmdos));
                         $this->plugin->saveConfig();
                         break;
 
