@@ -31,8 +31,7 @@ class VoteListener implements Listener {
             $this->plugin->getServer()->dispatchCommand($sender, $cmd);
         }
         
-        $player = $this->plugin->getServer()->getPlayer($event->getPlayer());
-        if($player === null) {
+        if($this->plugin->getServer()->getPlayer($event->getPlayer()) === null) {
             $this->vm->addVote($event->getPlayer(), $event->getSite(), $event->getIp());
             $this->vm->commit();
             return;
