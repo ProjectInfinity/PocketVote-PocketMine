@@ -61,14 +61,6 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                             $i++;
                             $sender->sendMessage(($color ? TextFormat::WHITE : TextFormat::GRAY).$i.'. /'.$cmd);
                         }
-
-                        $i = 0;
-                        $color = true;
-                        $sender->sendMessage(TextFormat::YELLOW.'cmdo, these run when the player is online:');
-                        foreach($this->plugin->cmdos as $cmd) {
-                            $i++;
-                            $sender->sendMessage(($color ? TextFormat::WHITE : TextFormat::GRAY).$i.'. /'.$cmd);
-                        }
                         break;
                     
                     case 'ADD':
@@ -118,6 +110,7 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                     case 'LIST':
                         $i = 0;
                         $color = true;
+                        $sender->sendMessage(TextFormat::YELLOW.'cmdo, these run when the player is online:');
                         foreach($this->plugin->cmdos as $cmd) {
                             $i++;
                             $sender->sendMessage(($color ? TextFormat::WHITE : TextFormat::GRAY).$i.'. /'.$cmd);
