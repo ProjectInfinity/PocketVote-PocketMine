@@ -1,5 +1,7 @@
+version: 0
 identity: ''
 secret: ''
+lock: false
 onvote:
   run-cmd:
   - 'say Thanks for voting for us at %site, %player!'

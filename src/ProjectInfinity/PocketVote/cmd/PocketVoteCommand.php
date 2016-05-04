@@ -29,6 +29,10 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
         switch(strtoupper($args[0])) {
             
             case 'IDENTITY':
+                if($this->plugin->lock) {
+                    $sender->sendMessage(TextFormat::RED.'This command has been locked.');
+                    return true;
+                }
                 if(!isset($args[1])) {
                     $sender->sendMessage(TextFormat::RED.'No identity specified. Get one at pocketvote.io');
                     return true;
@@ -40,6 +44,10 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                 break;
             
             case 'SECRET':
+                if($this->plugin->lock) {
+                    $sender->sendMessage(TextFormat::RED.'This command has been locked.');
+                    return true;
+                }
                 if(!isset($args[1])) {
                     $sender->sendMessage(TextFormat::RED.'No secret specified. Get one at pocketvote.io');
                     return true;

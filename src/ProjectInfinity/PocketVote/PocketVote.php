@@ -3,6 +3,7 @@
 namespace ProjectInfinity\PocketVote;
 
 use pocketmine\plugin\PluginBase;
+use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\cmd\PocketVoteCommand;
 use ProjectInfinity\PocketVote\task\SchedulerTask;
 use ProjectInfinity\PocketVote\util\VoteManager;
@@ -12,6 +13,7 @@ class PocketVote extends PluginBase {
     /** @var PocketVote $plugin */
     private static $plugin;
 
+    public $lock;
     public $identity;
     public $secret;
 
@@ -26,6 +28,7 @@ class PocketVote extends PluginBase {
     public function onEnable() {
         self::$plugin = $this;
         $this->saveDefaultConfig();
+        $this->updateConfig();
         
         # Save and load certificates.
         self::$cert = $this->getDataFolder().'cacert.pem';
@@ -59,6 +62,7 @@ class PocketVote extends PluginBase {
         $this->secret = $this->getConfig()->get('secret', null);
         $this->cmds = $this->getConfig()->getNested('onvote.run-cmd', []);
         $this->cmdos = $this->getConfig()->getNested('onvote.online-cmd', []);
+        $this->lock = $this->getConfig()->get('lock', false);
         $this->voteManager = new VoteManager($this);
         $this->getServer()->getCommandMap()->register('pocketvote', new PocketVoteCommand($this));
         $this->getServer()->getPluginManager()->registerEvents(new VoteListener($this), $this);
@@ -77,6 +81,15 @@ class PocketVote extends PluginBase {
     
     public function getVoteManager(): VoteManager {
         return $this->voteManager;
+    }
+
+    public function updateConfig() {
+        if($this->getConfig()->get('version', 0) === 0) {
+            $this->getLogger()->info(TextFormat::YELLOW.'Migrating config to version 1.');
+            $this->getConfig()->set('version', 1);
+            $this->getConfig()->set('lock', true); # TODO: Change this to false later.
+            $this->saveConfig();
+        }
     }
 
 }
