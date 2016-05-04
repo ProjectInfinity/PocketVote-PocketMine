@@ -35,6 +35,8 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                 }
                 $this->plugin->identity = $args[1];
                 $sender->sendMessage(TextFormat::GREEN.'Successfully set identity.');
+                $this->plugin->getConfig()->set('identity', $this->plugin->identity);
+                $this->plugin->saveConfig();
                 break;
             
             case 'SECRET':
@@ -44,6 +46,8 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                 }
                 $this->plugin->secret = $args[1];
                 $sender->sendMessage(TextFormat::GREEN.'Successfully set secret.');
+                $this->plugin->getConfig()->set('secret', $this->plugin->secret);
+                $this->plugin->saveConfig();
                 break;
 
             case 'CMD':
