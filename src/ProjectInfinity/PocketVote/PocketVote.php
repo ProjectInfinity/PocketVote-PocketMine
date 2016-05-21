@@ -33,6 +33,9 @@ class PocketVote extends PluginBase {
         # Save and load certificates.
         self::$cert = $this->getDataFolder().'cacert.pem';
         if(!file_exists(self::$cert)) {
+
+            $this->getLogger()->warning('Could not find cacert.pem, downloading it now.');
+
             $curl = curl_init('https://curl.haxx.se/ca/cacert.pem');
 
             curl_setopt_array($curl, [
@@ -40,6 +43,7 @@ class PocketVote extends PluginBase {
                 CURLOPT_PORT => 443,
                 CURLOPT_HEADER => false,
                 CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_CONNECTTIMEOUT => 10
             ]);
 
             $res = curl_exec($curl);

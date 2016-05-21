@@ -23,7 +23,7 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
             return true;
         }
         if(count($args) === 0) {
-            $sender->sendMessage(TextFormat::AQUA.'Specify an action: SECRET, IDENTITY, CMD');
+            $sender->sendMessage(TextFormat::AQUA.'Specify an action: SECRET, IDENTITY, CMD, CMDO');
             return true;
         }
         switch(strtoupper($args[0])) {
@@ -77,7 +77,7 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                     
                     case 'ADD':
                         if(count($args) < 3) {
-                            $sender->sendMessage(TextFormat::RED.'You need to specify a command to add. NO LEADING SLASH!');
+                            $sender->sendMessage(TextFormat::RED.'You need to specify a command to add.');
                             return true;
                         }
                         unset($args[0], $args[1]);
@@ -131,7 +131,7 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
 
                     case 'ADD':
                         if(count($args) < 3) {
-                            $sender->sendMessage(TextFormat::RED.'You need to specify a command to add. NO LEADING SLASH!');
+                            $sender->sendMessage(TextFormat::RED.'You need to specify a command to add.');
                             return true;
                         }
                         unset($args[0], $args[1]);
