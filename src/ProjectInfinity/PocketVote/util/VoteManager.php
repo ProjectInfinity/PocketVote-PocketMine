@@ -35,7 +35,7 @@ class VoteManager {
     } 
     
     public function addVote($player, $site, $ip) {
-        $this->votes[time().str_replace('.', '', $site).$player] = ['player' => $player, 'site' => $site, 'ip' => $ip];
+        $this->votes[] = ['player' => $player, 'site' => $site, 'ip' => $ip];
     }
     
     public function removeVote($key) {
@@ -43,7 +43,7 @@ class VoteManager {
     }
 
     public function commit() {
-        $this->plugin->getConfig()->set('votes', $this->votes);
+        $this->plugin->getConfig()->set('votes', array_values($this->votes));
         $this->plugin->saveConfig();
     }
 
