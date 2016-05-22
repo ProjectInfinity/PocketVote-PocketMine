@@ -5,6 +5,7 @@ namespace ProjectInfinity\PocketVote;
 use pocketmine\command\ConsoleCommandSender;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerJoinEvent;
+use ProjectInfinity\PocketVote\event\VoteDispatchEvent;
 use ProjectInfinity\PocketVote\event\VoteEvent;
 
 class VoteListener implements Listener {
@@ -54,6 +55,7 @@ class VoteListener implements Listener {
 
         $sender = new ConsoleCommandSender();
         foreach($this->vm->getVotes($event->getPlayer()->getName()) as $key => $vote) {
+            $this->plugin->getServer()->getPluginManager()->callEvent(new VoteDispatchEvent($this->plugin, $vote['player'], $vote['ip'], $vote['site']));
             # Iterate all commands.
             foreach($this->plugin->cmdos as $cmd) {
                 $cmd = str_replace('%player', $vote['player'], $cmd);
