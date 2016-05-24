@@ -91,7 +91,7 @@ class PocketVote extends PluginBase {
         if($this->getConfig()->get('version', 0) === 0) {
             $this->getLogger()->info(TextFormat::YELLOW.'Migrating config to version 1.');
             $this->getConfig()->set('version', 1);
-            $this->getConfig()->set('lock', true); # TODO: Change this to false later.
+            $this->getConfig()->set('lock', false);
             $this->saveConfig();
         }
         if($this->getConfig()->get('version', 0) === 1) {
