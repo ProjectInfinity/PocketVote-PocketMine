@@ -17,6 +17,10 @@ class PocketVote extends PluginBase {
     public $identity;
     public $secret;
 
+    public $multiserver;
+    public $multiserver_role;
+    public $mysql_host, $mysql_port, $mysql_username, $mysql_password, $mysql_database;
+
     public $cmds;
     public $cmdos;
     
@@ -61,7 +65,34 @@ class PocketVote extends PluginBase {
 
             curl_close($curl);
         }
-        
+
+        $this->multiserver = $this->getConfig()->getNested('multi-server.enabled', false);
+        $this->multiserver_role = $this->getConfig()->getNested('multi-server.role', 'master');
+        $this->mysql_host = $this->getConfig()->getNested('multi-server.mysql.host', 'localhost');
+        $this->mysql_port = $this->getConfig()->getNested('multi-server.mysql.port', 3306);
+        $this->mysql_username = $this->getConfig()->getNested('multi-server.mysql.username', 'pocketvote');
+        $this->mysql_password = $this->getConfig()->getNested('multi-server.mysql.password', 'pocketvote');
+        $this->mysql_database = $this->getConfig()->getNested('multi-server.mysql.database', 'pocketvote');
+
+        if($this->multiserver) {
+            $db = new \mysqli($this->mysql_host, $this->mysql_username, $this->mysql_password, $this->mysql_database, $this->mysql_port);
+            # Ensure we are actually connected.
+            if(!$db->ping()) {
+                $this->getLogger()->critical('Failed to get connection to database.');
+            }
+
+            # Ensure tables exist.
+            $resource = $this->getResource('create_votes_table.sql');
+            $db->query(stream_get_contents($resource));
+            fclose($resource);
+            $resource = $this->getResource('create_checks_table.sql');
+            $db->query(stream_get_contents($resource));
+            fclose($resource);
+
+            # All done.
+            $db->close();
+        }
+
         $this->identity = $this->getConfig()->get('identity', null);
         $this->secret = $this->getConfig()->get('secret', null);
         $this->cmds = $this->getConfig()->getNested('onvote.run-cmd', []);
@@ -70,6 +101,7 @@ class PocketVote extends PluginBase {
         $this->voteManager = new VoteManager($this);
         $this->getServer()->getCommandMap()->register('pocketvote', new PocketVoteCommand($this));
         $this->getServer()->getPluginManager()->registerEvents(new VoteListener($this), $this);
+
         $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 1200); # 1200 ticks = 60 seconds.
     }
 
@@ -102,6 +134,18 @@ class PocketVote extends PluginBase {
             }
             $this->getConfig()->set('votes', $votes);
             $this->getConfig()->set('version', 2);
+            $this->saveConfig();
+        }
+        if($this->getConfig()->get('version', 0) === 2) {
+            $this->getLogger()->info(TextFormat::YELLOW.'Migrating config to version 3.');
+            $this->getConfig()->setNested('multi-server.enabled', false);
+            $this->getConfig()->setNested('multi-server.role', 'master');
+            $this->getConfig()->setNested('multi-server.mysql.host', 'localhost');
+            $this->getConfig()->setNested('multi-server.mysql.port', 3306);
+            $this->getConfig()->setNested('multi-server.mysql.username', 'pocketvote');
+            $this->getConfig()->setNested('multi-server.mysql.password', 'pocketvote');
+            $this->getConfig()->setNested('multi-server.mysql.database', 'pocketvote');
+            $this->getConfig()->set('version', 3);
             $this->saveConfig();
         }
     }

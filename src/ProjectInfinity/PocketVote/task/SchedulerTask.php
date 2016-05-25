@@ -17,6 +17,7 @@ class SchedulerTask extends Task {
 
     public function onRun($currentTick) {
         $this->plugin->getLogger()->debug('Checking for outstanding votes.');
-        $this->plugin->getServer()->getScheduler()->scheduleAsyncTask(new VoteCheckTask($this->plugin->identity, $this->plugin->secret, $this->version));
+        if(!$this->plugin->multiserver or ($this->plugin->multiserver and strtolower($this->plugin->multiserver_role) === 'master')) $this->plugin->getServer()->getScheduler()->scheduleAsyncTask(new VoteCheckTask($this->plugin->identity, $this->plugin->secret, $this->version));
+        if($this->plugin->multiserver and strtolower($this->plugin->multiserver_role) === 'slave') $this->plugin->getServer()->getScheduler()->scheduleAsyncTask(new SlaveCheckTask());
     }
 }

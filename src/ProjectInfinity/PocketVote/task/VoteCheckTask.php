@@ -14,12 +14,21 @@ class VoteCheckTask extends AsyncTask {
     public $secret;
     public $version;
     public $cert;
+
+    public $multiserver;
+    public $mysql_host, $mysql_port, $mysql_username, $mysql_password, $mysql_database;
     
     public function __construct($identity, $secret, $version) {
         $this->identity = $identity;
         $this->secret = $secret;
         $this->version = $version;
         $this->cert = PocketVote::$cert;
+        $this->mysql_host = PocketVote::getPlugin()->mysql_host;
+        $this->mysql_port = PocketVote::getPlugin()->mysql_port;
+        $this->mysql_username = PocketVote::getPlugin()->mysql_username;
+        $this->mysql_password = PocketVote::getPlugin()->mysql_password;
+        $this->mysql_database = PocketVote::getPlugin()->mysql_database;
+        $this->multiserver = PocketVote::getPlugin()->multiserver;
     }
 
     public function onRun() {
@@ -43,7 +52,50 @@ class VoteCheckTask extends AsyncTask {
             echo PHP_EOL.curl_error($curl).PHP_EOL;
             echo curl_errno($curl).PHP_EOL;
         } else {
-            $this->setResult($res);
+
+            $result = json_decode($res);
+
+            if($result->code === 'success' and strpos($result->message, 'outstanding') === false) {
+                JWT::$leeway = 54000;
+                try {
+                    $decoded = JWT::decode($result->payload, $this->secret, array('HS256'));
+                } catch(\Exception $e) {
+                    echo PHP_EOL . $e->getMessage() . PHP_EOL;
+                    return;
+                }
+
+                $decoded_array = (array)$decoded;
+                unset($decoded_array['iat']);
+
+                $votes = [];
+
+                foreach($decoded_array as $key => $vote) {
+                    $votes[] = $vote;
+                }
+                
+                $this->setResult($votes);
+
+                if($this->multiserver and count($votes) > 0) {
+                    $db = new \mysqli($this->mysql_host, $this->mysql_username, $this->mysql_password, $this->mysql_database, $this->mysql_port);
+                    # Ensure we are actually connected.
+                    if(!$db->ping()) {
+                        curl_close($curl);
+                        return;
+                    }
+                    $time = time();
+                    foreach($votes as $vote) {
+                        $stmt = $db->prepare('INSERT INTO `pocketvote_votes` (`player`, `ip`, `site`, `timestamp`) VALUES (?, ?, ?, ?)');
+                        $stmt->bind_param('sssi', $vote->player, $vote->ip, $vote->site, $time);
+                        $stmt->execute();
+                        $stmt->close();
+                    }
+
+                    # All done.
+                    $db->close();
+                }
+            } else {
+                $this->setResult([]);
+            }
         }
 
         curl_close($curl);
@@ -56,32 +108,15 @@ class VoteCheckTask extends AsyncTask {
             $server->getLogger()->emergency('A request finished without a response from the API. It may have failed to be sent.');
             return;
         }
-
-        $result = json_decode($this->getResult());
-
-        if($result->code === 'success' and strpos($result->message, 'outstanding') === false) {
-            JWT::$leeway = 54000;
-            try {
-                $decoded = JWT::decode($result->payload, $this->secret, array('HS256'));
-            } catch(\Exception $e) {
-                Server::getInstance()->getLogger()->alert($e->getMessage());
-                return;
-            }
-
-            $decoded_array = (array) $decoded;
-            unset($decoded_array['iat']);
             
-            foreach($decoded_array as $key => $vote) {
-                Server::getInstance()->getPluginManager()->callEvent(
-                    new VoteEvent(PocketVote::getPlugin(), 
+        foreach($this->getResult() as $vote) {
+            Server::getInstance()->getPluginManager()->callEvent(
+                new VoteEvent(PocketVote::getPlugin(),
                     $vote->player,
                     $vote->ip,
                     $vote->site
-                ));
-            }
-        } /*elseif($result->code === 'error') {
-            # We don't need to handle this right now.
-        }*/
-        
+                )
+            );
+        }
     }
 }
