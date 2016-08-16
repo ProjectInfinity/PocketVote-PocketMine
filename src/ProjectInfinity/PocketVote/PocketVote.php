@@ -106,6 +106,7 @@ class PocketVote extends PluginBase {
     }
 
     public function onDisable() {
+        $this->getServer()->getScheduler()->cancelTasks($this);
         self::$plugin = null;
         self::$cert = null;
         unset($this->identity, $this->secret, $this->voteManager, $this->cmds, $this->cmdos);
