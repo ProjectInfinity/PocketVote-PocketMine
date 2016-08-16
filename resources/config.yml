@@ -2,6 +2,7 @@ version: 0
 identity: ''
 secret: ''
 lock: false
+vote-expiration: 7
 multi-server:
   enabled: false
   role: 'master'

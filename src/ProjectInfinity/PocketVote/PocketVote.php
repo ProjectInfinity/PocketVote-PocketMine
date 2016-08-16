@@ -16,6 +16,7 @@ class PocketVote extends PluginBase {
     public $lock;
     public $identity;
     public $secret;
+    public $expiration;
 
     public $multiserver;
     public $multiserver_role;
@@ -98,6 +99,7 @@ class PocketVote extends PluginBase {
         $this->cmds = $this->getConfig()->getNested('onvote.run-cmd', []);
         $this->cmdos = $this->getConfig()->getNested('onvote.online-cmd', []);
         $this->lock = $this->getConfig()->get('lock', false);
+        $this->expiration = 86400 * $this->getConfig()->get('vote-expiration', 7);
         $this->voteManager = new VoteManager($this);
         $this->getServer()->getCommandMap()->register('pocketvote', new PocketVoteCommand($this));
         $this->getServer()->getPluginManager()->registerEvents(new VoteListener($this), $this);
@@ -109,7 +111,7 @@ class PocketVote extends PluginBase {
         $this->getServer()->getScheduler()->cancelTasks($this);
         self::$plugin = null;
         self::$cert = null;
-        unset($this->identity, $this->secret, $this->voteManager, $this->cmds, $this->cmdos);
+        unset($this->identity, $this->secret, $this->voteManager, $this->cmds, $this->cmdos, $this->expiration);
     }
     
     public static function getPlugin(): PocketVote {
@@ -147,6 +149,18 @@ class PocketVote extends PluginBase {
             $this->getConfig()->setNested('multi-server.mysql.password', 'pocketvote');
             $this->getConfig()->setNested('multi-server.mysql.database', 'pocketvote');
             $this->getConfig()->set('version', 3);
+            $this->saveConfig();
+        }
+        if($this->getConfig()->get('version', 0) === 3) {
+            $this->getLogger()->info(TextFormat::YELLOW.'Migrating config to version 4.');
+            $votes = [];
+            foreach($this->getConfig()->get('votes') as $key => $vote) {
+                $vote['expires'] = time() + (86400 * 7);
+                $votes[] = $vote;
+            }
+            $this->getConfig()->set('votes', $votes);
+            $this->getConfig()->set('vote-expiration', 7);
+            $this->getConfig()->set('version', 4);
             $this->saveConfig();
         }
     }

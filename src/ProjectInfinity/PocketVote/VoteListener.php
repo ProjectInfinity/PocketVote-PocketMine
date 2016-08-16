@@ -55,6 +55,11 @@ class VoteListener implements Listener {
 
         $sender = new ConsoleCommandSender();
         foreach($this->vm->getVotes($event->getPlayer()->getName()) as $key => $vote) {
+            if($this->plugin->expiration > 0 && (time() >= $vote['expires'])) {
+                # TODO: Add a task for this to periodically remove it and not only upon login.
+                $this->vm->removeVote($key);
+                continue;
+            }
             $this->plugin->getServer()->getPluginManager()->callEvent(new VoteDispatchEvent($this->plugin, $vote['player'], $vote['ip'], $vote['site']));
             # Iterate all commands.
             foreach($this->plugin->cmdos as $cmd) {
