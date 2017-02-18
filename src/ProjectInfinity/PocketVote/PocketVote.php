@@ -26,6 +26,7 @@ class PocketVote extends PluginBase {
     public $cmdos;
     
     public static $cert;
+    public static $dev;
 
     /** @var VoteManager $voteManager */
     private $voteManager;
@@ -34,6 +35,7 @@ class PocketVote extends PluginBase {
         self::$plugin = $this;
         $this->saveDefaultConfig();
         $this->updateConfig();
+        self::$dev = $this->getConfig()->get('dev', false) === true;
         
         # Save and load certificates.
         self::$cert = $this->getDataFolder().'cacert.pem';
@@ -112,6 +114,7 @@ class PocketVote extends PluginBase {
         $this->getServer()->getScheduler()->cancelTasks($this);
         self::$plugin = null;
         self::$cert = null;
+        self::$dev = null;
         unset($this->identity, $this->secret, $this->voteManager, $this->cmds, $this->cmdos, $this->expiration);
     }
     

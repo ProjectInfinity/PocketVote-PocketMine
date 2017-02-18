@@ -10,6 +10,8 @@ use ProjectInfinity\PocketVote\PocketVote;
 
 class VoteCheckTask extends AsyncTask {
 
+    public $isDev;
+
     public $identity;
     public $secret;
     public $version;
@@ -19,6 +21,7 @@ class VoteCheckTask extends AsyncTask {
     public $mysql_host, $mysql_port, $mysql_username, $mysql_password, $mysql_database;
     
     public function __construct($identity, $secret, $version) {
+        $this->isDev = PocketVote::$dev;
         $this->identity = $identity;
         $this->secret = $secret;
         $this->version = $version;
@@ -32,8 +35,8 @@ class VoteCheckTask extends AsyncTask {
     }
 
     public function onRun() {
-
-        $curl = curl_init('https://api.pocketvote.io/check');
+        # TODO: Set result output and exit, then read the result in on completion to get proper logging.
+        $curl = curl_init($this->isDev ? 'http://dev.pocketvote.io/check' : 'https://api.pocketvote.io/check');
 
         curl_setopt_array($curl, [
             CURLOPT_RETURNTRANSFER => 1,
@@ -56,7 +59,7 @@ class VoteCheckTask extends AsyncTask {
 
             $result = json_decode($res);
 
-            if($result->code === 'success' and strpos($result->message, 'outstanding') === false) {
+            if($result->code === 'success' && strpos($result->message, 'outstanding') === false) {
                 JWT::$leeway = 54000;
                 try {
                     $decoded = JWT::decode($result->payload, $this->secret, array('HS256'));
@@ -76,7 +79,7 @@ class VoteCheckTask extends AsyncTask {
                 
                 $this->setResult($votes);
 
-                if($this->multiserver and count($votes) > 0) {
+                if($this->multiserver && count($votes) > 0) {
                     $db = new \mysqli($this->mysql_host, $this->mysql_username, $this->mysql_password, $this->mysql_database, $this->mysql_port);
                     # Ensure we are actually connected.
                     if(!$db->ping()) {
