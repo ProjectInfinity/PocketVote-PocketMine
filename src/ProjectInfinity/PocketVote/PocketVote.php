@@ -43,6 +43,7 @@ class PocketVote extends PluginBase {
 
             $curl = curl_init('https://curl.haxx.se/ca/cacert.pem');
 
+            /** @noinspection CurlSslServerSpoofingInspection */
             curl_setopt_array($curl, [
                 CURLOPT_RETURNTRANSFER => 1,
                 CURLOPT_PORT => 443,
