@@ -59,7 +59,7 @@ class PocketVote extends PluginBase {
                 $this->getLogger()->critical(curl_errno($curl));
             } else {
                 $this->getLogger()->info('Downloading cURL root CA.');
-                $file = fopen(self::$cert, 'w+');
+                $file = fopen(self::$cert, 'wb+');
                 fwrite($file, $res);
                 fclose($file);
                 $this->getLogger()->info('Finished downloading cURL root CA.');
