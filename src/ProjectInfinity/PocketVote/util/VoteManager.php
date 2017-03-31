@@ -9,10 +9,20 @@ class VoteManager {
     private $plugin;
     
     private $votes;
+
+    private $voteLink = null;
     
     public function __construct(PocketVote $plugin) {
         $this->plugin = $plugin;
         $this->votes = $plugin->getConfig()->get('votes', []);
+    }
+
+    public function getVoteLink() {
+        return $this->voteLink;
+    }
+
+    public function setVoteLink($link) {
+        $this->voteLink = $link;
     }
     
     public function hasVotes($player) {

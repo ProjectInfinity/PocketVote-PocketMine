@@ -1,9 +1,12 @@
 name: PocketVote
 main: ProjectInfinity\PocketVote\PocketVote
-version: 1.3.1
+version: 2.0.0
 api: [3.0.0-ALPHA3]
 author: ProjectInfinity
 permissions:
   pocketvote.admin:
     description: "Allows player to manage PocketVote"
     default: op
+  pocketvote.vote:
+    description: "Allows a player to use the /vote command"
+    default: true

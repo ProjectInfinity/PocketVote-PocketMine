@@ -5,7 +5,10 @@ namespace ProjectInfinity\PocketVote;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\cmd\PocketVoteCommand;
+use ProjectInfinity\PocketVote\cmd\VoteCommand;
+use ProjectInfinity\PocketVote\task\HeartbeatTask;
 use ProjectInfinity\PocketVote\task\SchedulerTask;
+use ProjectInfinity\PocketVote\task\VoteLinkTask;
 use ProjectInfinity\PocketVote\util\VoteManager;
 
 class PocketVote extends PluginBase {
@@ -105,9 +108,15 @@ class PocketVote extends PluginBase {
         $this->expiration = 86400 * $this->getConfig()->get('vote-expiration', 7);
         $this->voteManager = new VoteManager($this);
         $this->getServer()->getCommandMap()->register('pocketvote', new PocketVoteCommand($this));
+        $this->getServer()->getCommandMap()->register('vote', new VoteCommand($this));
         $this->getServer()->getPluginManager()->registerEvents(new VoteListener($this), $this);
 
         $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 1200); # 1200 ticks = 60 seconds.
+        
+        # Get voting link.
+        $this->getServer()->getScheduler()->scheduleAsyncTask(new VoteLinkTask($this->identity));
+        # Report usage.
+        $this->getServer()->getScheduler()->scheduleAsyncTask(new HeartbeatTask($this->identity));
     }
 
     public function onDisable() {

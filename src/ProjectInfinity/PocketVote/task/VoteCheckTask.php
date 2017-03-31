@@ -36,11 +36,11 @@ class VoteCheckTask extends AsyncTask {
 
     public function onRun() {
         # TODO: Set result output and exit, then read the result in on completion to get proper logging.
-        $curl = curl_init($this->isDev ? 'http://dev.pocketvote.io/check' : 'https://api.pocketvote.io/check');
+        $curl = curl_init($this->isDev ? 'http://127.0.0.1/check' : 'https://api.pocketvote.io/check');
 
         curl_setopt_array($curl, [
             CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_PORT => 443,
+            CURLOPT_PORT => $this->isDev ? 9000 : 443,
             CURLOPT_HEADER => false,
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
@@ -103,7 +103,6 @@ class VoteCheckTask extends AsyncTask {
         }
 
         curl_close($curl);
-        
     }
     
     public function onCompletion(Server $server) {
