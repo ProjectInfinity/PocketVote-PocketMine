@@ -3,6 +3,7 @@
 namespace ProjectInfinity\PocketVote;
 
 use pocketmine\plugin\PluginBase;
+use pocketmine\scheduler\TaskHandler;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\cmd\PocketVoteCommand;
 use ProjectInfinity\PocketVote\cmd\VoteCommand;
@@ -33,6 +34,11 @@ class PocketVote extends PluginBase {
 
     /** @var VoteManager $voteManager */
     private $voteManager;
+
+    /** @var  TaskHandler $schedulerTask */
+    private $schedulerTask;
+    private $schedulerTs;
+    private $schedulerFreq = 60;
 
     public function onEnable() {
         self::$plugin = $this;
@@ -111,8 +117,7 @@ class PocketVote extends PluginBase {
         $this->getServer()->getCommandMap()->register('vote', new VoteCommand($this));
         $this->getServer()->getPluginManager()->registerEvents(new VoteListener($this), $this);
 
-        $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 1200); # 1200 ticks = 60 seconds.
-        
+        $this->schedulerTask = $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 1200); # 1200 ticks = 60 seconds.
         # Get voting link.
         $this->getServer()->getScheduler()->scheduleAsyncTask(new VoteLinkTask($this->identity));
         # Report usage.
@@ -133,6 +138,24 @@ class PocketVote extends PluginBase {
     
     public function getVoteManager(): VoteManager {
         return $this->voteManager;
+    }
+
+    public function stopScheduler() {
+        if($this->schedulerTask->isCancelled()) return;
+        $this->schedulerTask->cancel();
+    }
+
+    public function startScheduler(int $seconds) {
+        $time = time();
+        # Ensure that at least 5 minutes has passed since we last changed frequency and check that the frequency is different from before.
+        if($time - $this->schedulerTs < 300 || $this->schedulerFreq === $seconds) return;
+        if(!$this->schedulerTask->isCancelled()) $this->schedulerTask->cancel();
+
+        $this->schedulerTs = $time;
+        $this->schedulerTask = $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), $seconds > 0 ? ($seconds * 20) : 1200);
+        $this->schedulerFreq = $seconds;
+
+        $this->getLogger()->debug("Scheduler interval changed to $seconds seconds.");
     }
 
     public function updateConfig() {
