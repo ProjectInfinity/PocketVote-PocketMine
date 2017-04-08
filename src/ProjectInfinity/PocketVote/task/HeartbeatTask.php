@@ -42,7 +42,6 @@ class HeartbeatTask extends AsyncTask {
         ];
     }
 
-    # TODO: Change echos to logging in onCompletion.
     public function onRun() {
 
         if($this->secret === null || $this->identity === null) return;
@@ -65,13 +64,7 @@ class HeartbeatTask extends AsyncTask {
             ]
         ]);
 
-        $res = curl_exec($curl);
-
-        if($res === false) {
-            echo PHP_EOL.curl_error($curl).PHP_EOL;
-            echo curl_errno($curl).PHP_EOL;
-        }
-
+        curl_exec($curl);
         curl_close($curl);
     }
 }
