@@ -12,20 +12,23 @@ class GuruTask extends AsyncTask {
     public $identity;
     public $version;
     public $url;
+    public $method;
+    public $postFields;
 
-    public function __construct($url) {
+    public function __construct($url, $method = 'GET', $postFields = null) {
         $this->url = $url;
         $this->isDev = PocketVote::$dev;
         $this->cert = PocketVote::$cert;
         $this->identity = PocketVote::getPlugin()->identity;
         $this->version = PocketVote::getPlugin()->getDescription()->getVersion();
+        $this->method = $method;
+        $this->postFields = $postFields;
     }
 
     public function onRun() {
         $curl = curl_init($this->url);
-        var_dump($this->url);
 
-        curl_setopt_array($curl, [
+        $options = [
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_PORT => $this->isDev ? 80 : 443,
             CURLOPT_HEADER => false,
@@ -35,7 +38,16 @@ class GuruTask extends AsyncTask {
             CURLOPT_CAINFO => $this->cert,
             CURLOPT_USERAGENT => 'PocketVote v'.$this->version,
             CURLOPT_HTTPHEADER => ['Identity: '.$this->identity]
-        ]);
+        ];
+
+        switch($this->method) {
+            case 'POST':
+                $options[CURLOPT_POST] = 1;
+                if($this->postFields !== null) $options[CURLOPT_POSTFIELDS] = $this->postFields;
+                break;
+        }
+
+        curl_setopt_array($curl, $options);
 
         $res = curl_exec($curl);
 

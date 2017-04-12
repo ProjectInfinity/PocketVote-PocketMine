@@ -5,6 +5,7 @@ namespace ProjectInfinity\PocketVote;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\TaskHandler;
 use pocketmine\utils\TextFormat;
+use ProjectInfinity\PocketVote\cmd\guru\GuAddCommand;
 use ProjectInfinity\PocketVote\cmd\guru\GuListCommand;
 use ProjectInfinity\PocketVote\cmd\PocketVoteCommand;
 use ProjectInfinity\PocketVote\cmd\VoteCommand;
@@ -116,8 +117,11 @@ class PocketVote extends PluginBase {
         $this->voteManager = new VoteManager($this);
         $this->getServer()->getCommandMap()->register('pocketvote', new PocketVoteCommand($this));
         $this->getServer()->getCommandMap()->register('vote', new VoteCommand($this));
+
         ### MCPE Guru commands ###
+        $this->getServer()->getCommandMap()->register('guadd', new GuAddCommand($this));
         $this->getServer()->getCommandMap()->register('gulist', new GuListCommand($this));
+
         $this->getServer()->getPluginManager()->registerEvents(new VoteListener($this), $this);
 
         $this->schedulerTask = $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 1200); # 1200 ticks = 60 seconds.
