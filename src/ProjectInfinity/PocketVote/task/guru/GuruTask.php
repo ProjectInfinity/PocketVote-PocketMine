@@ -45,6 +45,10 @@ class GuruTask extends AsyncTask {
                 $options[CURLOPT_POST] = 1;
                 if($this->postFields !== null) $options[CURLOPT_POSTFIELDS] = $this->postFields;
                 break;
+
+            case 'DELETE':
+                $options[CURLOPT_CUSTOMREQUEST] = 'DELETE';
+                break;
         }
 
         curl_setopt_array($curl, $options);
