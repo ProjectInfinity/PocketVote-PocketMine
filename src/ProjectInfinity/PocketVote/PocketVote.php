@@ -7,6 +7,7 @@ use pocketmine\scheduler\TaskHandler;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\cmd\guru\GuAddCommand;
 use ProjectInfinity\PocketVote\cmd\guru\GuListCommand;
+use ProjectInfinity\PocketVote\cmd\guru\GuruCommand;
 use ProjectInfinity\PocketVote\cmd\PocketVoteCommand;
 use ProjectInfinity\PocketVote\cmd\VoteCommand;
 use ProjectInfinity\PocketVote\task\HeartbeatTask;
@@ -119,6 +120,7 @@ class PocketVote extends PluginBase {
         $this->getServer()->getCommandMap()->register('vote', new VoteCommand($this));
 
         ### MCPE Guru commands ###
+        $this->getServer()->getCommandMap()->register('guru', new GuruCommand($this));
         $this->getServer()->getCommandMap()->register('guadd', new GuAddCommand($this));
         $this->getServer()->getCommandMap()->register('gulist', new GuListCommand($this));
 
