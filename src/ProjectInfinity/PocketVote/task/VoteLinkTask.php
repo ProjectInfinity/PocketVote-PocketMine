@@ -40,8 +40,7 @@ class VoteLinkTask extends AsyncTask {
         $res = curl_exec($curl);
 
         if($res === false) {
-            echo PHP_EOL.curl_error($curl).PHP_EOL;
-            echo curl_errno($curl).PHP_EOL;
+            $this->setResult((object)['error' => curl_error($curl)]);
         } else {
             $result = json_decode($res);
 
@@ -66,6 +65,12 @@ class VoteLinkTask extends AsyncTask {
             return;
         }
         $result = $this->getResult();
+
+        if(isset($result->error)) {
+            $server->getLogger()->error(TextFormat::DARK_RED.'[PocketVote] An error occurred while getting vote link.');
+            $server->getLogger()->error('[PocketVote] Curl error: '.$result->error);
+            return;
+        }
 
         if(!$result->success) {
             $server->getLogger()->warning('[PocketVote] Server not found when attempting to retrieve vote link, is your identity correct?');
