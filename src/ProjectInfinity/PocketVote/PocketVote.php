@@ -6,6 +6,7 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\TaskHandler;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\cmd\guru\GuAddCommand;
+use ProjectInfinity\PocketVote\cmd\guru\GuDelCommand;
 use ProjectInfinity\PocketVote\cmd\guru\GuListCommand;
 use ProjectInfinity\PocketVote\cmd\guru\GuruCommand;
 use ProjectInfinity\PocketVote\cmd\PocketVoteCommand;
@@ -122,6 +123,7 @@ class PocketVote extends PluginBase {
         ### MCPE Guru commands ###
         $this->getServer()->getCommandMap()->register('guru', new GuruCommand($this));
         $this->getServer()->getCommandMap()->register('guadd', new GuAddCommand($this));
+        $this->getServer()->getCommandMap()->register('gudel', new GuDelCommand($this));
         $this->getServer()->getCommandMap()->register('gulist', new GuListCommand($this));
 
         $this->getServer()->getPluginManager()->registerEvents(new VoteListener($this), $this);
