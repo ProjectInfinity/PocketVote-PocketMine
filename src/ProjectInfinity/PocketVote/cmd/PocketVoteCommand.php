@@ -23,7 +23,7 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
             return true;
         }
         if(count($args) === 0) {
-            $sender->sendMessage(TextFormat::AQUA.'Specify an action: SECRET, IDENTITY, CMD, CMDO');
+            $sender->sendMessage(TextFormat::AQUA.'Specify an action: SECRET, IDENTITY, CMD, CMDO, TOP');
             return true;
         }
         switch(strtoupper($args[0])) {

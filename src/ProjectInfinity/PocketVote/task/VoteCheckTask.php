@@ -4,6 +4,7 @@ namespace ProjectInfinity\PocketVote\task;
 
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
+use ProjectInfinity\PocketVote\data\TaskResult;
 use ProjectInfinity\PocketVote\event\VoteEvent;
 use ProjectInfinity\PocketVote\lib\Firebase\JWT;
 use ProjectInfinity\PocketVote\PocketVote;
@@ -35,8 +36,7 @@ class VoteCheckTask extends AsyncTask {
     }
 
     public function onRun() {
-        # TODO: Set result output and exit, then read the result in on completion to get proper logging.
-        $curl = curl_init($this->isDev ? 'http://127.0.0.1/check' : 'https://api.pocketvote.io/check');
+        $curl = curl_init($this->isDev ? 'http://127.0.0.1/v2/check' : 'https://api.pocketvote.io/v2/check');
 
         curl_setopt_array($curl, [
             CURLOPT_RETURNTRANSFER => 1,
@@ -53,18 +53,22 @@ class VoteCheckTask extends AsyncTask {
         $res = curl_exec($curl);
 
         if($res === false) {
-            echo PHP_EOL.curl_error($curl).PHP_EOL;
-            echo curl_errno($curl).PHP_EOL;
+            $this->setResult($this->createResult(true, null, curl_error($curl)));
         } else {
 
             $result = json_decode($res);
 
-            if($result->code === 'success' && strpos($result->message, 'outstanding') === false) {
+            if(isset($result->code) && $result->code === 'InternalError') {
+                $this->setResult($this->createResult(true, $result));
+                return;
+            }
+
+            if($result->success && isset($result->payload)) {
                 JWT::$leeway = 54000;
                 try {
                     $decoded = JWT::decode($result->payload, $this->secret, array('HS256'));
                 } catch(\Exception $e) {
-                    echo PHP_EOL . $e->getMessage() . PHP_EOL;
+                    $this->setResult($this->createResult(true, $result, $e->getMessage()));
                     return;
                 }
 
@@ -76,8 +80,10 @@ class VoteCheckTask extends AsyncTask {
                 foreach($decoded_array as $key => $vote) {
                     $votes[] = $vote;
                 }
-                
-                $this->setResult($votes);
+
+                $r = $this->createResult(false, $result);
+                $r->setVotes($votes[0]);
+                $this->setResult($r);
 
                 if($this->multiserver && count($votes) > 0) {
                     $db = new \mysqli($this->mysql_host, $this->mysql_username, $this->mysql_password, $this->mysql_database, $this->mysql_port);
@@ -97,12 +103,37 @@ class VoteCheckTask extends AsyncTask {
                     # All done.
                     $db->close();
                 }
-            } else {
-                $this->setResult([]);
+            }
+
+            # No outstanding votes.
+            if($result->success && !isset($result->payload)) {
+                $this->setResult($this->createResult(false, $result));
+            }
+
+            if(!$result->success) {
+                $this->setResult($this->createResult(true, $result));
             }
         }
-
         curl_close($curl);
+    }
+
+    private function createResult($error, $res, $customError = null) {
+        $r = new TaskResult();
+        $r->setError($error);
+        if($error) {
+            if(!isset($customError)) {
+                $r->setErrorData(['message' => $res->message]);
+            }
+            else {
+                $r->setErrorData(['message' => $customError]);
+            }
+        }
+        # Had votes.
+        if(isset($res->payload) && $res->success) $r->setVotes($res->payload);
+
+        if(isset($res->meta)) $r->setMeta($res->meta);
+
+        return $r;
     }
     
     public function onCompletion(Server $server) {
@@ -111,8 +142,23 @@ class VoteCheckTask extends AsyncTask {
             $server->getLogger()->emergency('A request finished without a response from the API. It may have failed to be sent.');
             return;
         }
-            
-        foreach($this->getResult() as $vote) {
+
+        $result = $this->getResult();
+
+        if(!($result instanceof TaskResult)) {
+            $server->getLogger()->warning('VoteCheckTask result was not an instance of TaskResult');
+            return;
+        }
+
+        # Set meta.
+        PocketVote::getPlugin()->startScheduler($result->getMeta()->frequency ?? 60);
+
+        if($result->hasError()) {
+            $server->getLogger()->error('[PocketVote] VoteCheckTask: '.$result->getError()['message']);
+            return;
+        }
+
+        foreach($result->getVotes() as $key => $vote) {
             Server::getInstance()->getPluginManager()->callEvent(
                 new VoteEvent(PocketVote::getPlugin(),
                     $vote->player,

@@ -63,6 +63,7 @@ class VoteLinkTask extends AsyncTask {
 
         if(!$this->hasResult()) {
             $server->getLogger()->warning('[PocketVote] Failed to retrieve voting link from MCPE.guru, the API may be down.');
+            return;
         }
         $result = $this->getResult();
 

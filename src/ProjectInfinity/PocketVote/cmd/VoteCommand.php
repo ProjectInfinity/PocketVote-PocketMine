@@ -7,6 +7,7 @@ use pocketmine\command\CommandSender;
 use pocketmine\command\PluginIdentifiableCommand;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
+use ProjectInfinity\PocketVote\task\TopVoterTask;
 
 class VoteCommand extends Command implements PluginIdentifiableCommand {
 
@@ -22,10 +23,14 @@ class VoteCommand extends Command implements PluginIdentifiableCommand {
             $sender->sendMessage(TextFormat::RED.'You do not have permission use /vote.');
             return true;
         }
+        if(isset($args[0]) && strtoupper($args[0]) === 'TOP') {
+            $this->plugin->getServer()->getScheduler()->scheduleAsyncTask(new TopVoterTask($this->plugin->identity, $sender->getName()));
+            return true;
+        }
         $link = $this->plugin->getVoteManager()->getVoteLink();
         if($link === null) {
             if($sender->hasPermission('pocketvote.admin')) {
-                $sender->sendMessage(TextFormat::YELLOW.'You can add a link by typing /guruadd');
+                $sender->sendMessage(TextFormat::YELLOW.'You can add a link by typing /guadd');
                 $sender->sendMessage(TextFormat::YELLOW.'See /guru for help!');
             } else {
                 $sender->sendMessage(TextFormat::YELLOW.'The server operator has not added any voting sites.');

@@ -3,7 +3,12 @@
 namespace ProjectInfinity\PocketVote;
 
 use pocketmine\plugin\PluginBase;
+use pocketmine\scheduler\TaskHandler;
 use pocketmine\utils\TextFormat;
+use ProjectInfinity\PocketVote\cmd\guru\GuAddCommand;
+use ProjectInfinity\PocketVote\cmd\guru\GuDelCommand;
+use ProjectInfinity\PocketVote\cmd\guru\GuListCommand;
+use ProjectInfinity\PocketVote\cmd\guru\GuruCommand;
 use ProjectInfinity\PocketVote\cmd\PocketVoteCommand;
 use ProjectInfinity\PocketVote\cmd\VoteCommand;
 use ProjectInfinity\PocketVote\task\HeartbeatTask;
@@ -33,6 +38,11 @@ class PocketVote extends PluginBase {
 
     /** @var VoteManager $voteManager */
     private $voteManager;
+
+    /** @var  TaskHandler $schedulerTask */
+    private $schedulerTask;
+    private $schedulerTs;
+    private $schedulerFreq = 60;
 
     public function onEnable() {
         self::$plugin = $this;
@@ -109,10 +119,16 @@ class PocketVote extends PluginBase {
         $this->voteManager = new VoteManager($this);
         $this->getServer()->getCommandMap()->register('pocketvote', new PocketVoteCommand($this));
         $this->getServer()->getCommandMap()->register('vote', new VoteCommand($this));
+
+        ### MCPE Guru commands ###
+        $this->getServer()->getCommandMap()->register('guru', new GuruCommand($this));
+        $this->getServer()->getCommandMap()->register('guadd', new GuAddCommand($this));
+        $this->getServer()->getCommandMap()->register('gudel', new GuDelCommand($this));
+        $this->getServer()->getCommandMap()->register('gulist', new GuListCommand($this));
+
         $this->getServer()->getPluginManager()->registerEvents(new VoteListener($this), $this);
 
-        $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 1200); # 1200 ticks = 60 seconds.
-        
+        $this->schedulerTask = $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 1200); # 1200 ticks = 60 seconds.
         # Get voting link.
         $this->getServer()->getScheduler()->scheduleAsyncTask(new VoteLinkTask($this->identity));
         # Report usage.
@@ -133,6 +149,24 @@ class PocketVote extends PluginBase {
     
     public function getVoteManager(): VoteManager {
         return $this->voteManager;
+    }
+
+    public function stopScheduler() {
+        if($this->schedulerTask->isCancelled()) return;
+        $this->schedulerTask->cancel();
+    }
+
+    public function startScheduler(int $seconds) {
+        $time = time();
+        # Ensure that at least 5 minutes has passed since we last changed frequency and check that the frequency is different from before.
+        if($time - $this->schedulerTs < 300 || $this->schedulerFreq === $seconds) return;
+        if(!$this->schedulerTask->isCancelled()) $this->schedulerTask->cancel();
+
+        $this->schedulerTs = $time;
+        $this->schedulerTask = $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), $seconds > 0 ? ($seconds * 20) : 1200);
+        $this->schedulerFreq = $seconds;
+
+        $this->getLogger()->debug("Scheduler interval changed to $seconds seconds.");
     }
 
     public function updateConfig() {
