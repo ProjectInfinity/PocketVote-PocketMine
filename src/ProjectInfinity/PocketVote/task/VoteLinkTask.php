@@ -21,7 +21,6 @@ class VoteLinkTask extends AsyncTask {
         $this->version = PocketVote::getPlugin()->getDescription()->getVersion();
     }
 
-    # TODO: Change echos to logging in onCompletion.
     public function onRun() {
         $curl = curl_init($this->isDev ? 'http://dev.mcpe.guru/api/link' : 'https://mcpe.guru/api/link');
 

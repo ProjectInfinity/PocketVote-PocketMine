@@ -40,7 +40,6 @@ class VoteCommand extends Command implements PluginIdentifiableCommand {
         if($sender->hasPermission('pocketvote.admin')) $sender->sendMessage(TextFormat::YELLOW.'Use /guru to manage this link.');
         $sender->sendMessage(TextFormat::AQUA.'You can vote at '.$link);
         return true;
-        # TODO: Create guru command.
     }
 
     public function getPlugin() {
