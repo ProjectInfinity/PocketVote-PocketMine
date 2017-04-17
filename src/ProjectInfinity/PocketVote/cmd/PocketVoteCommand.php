@@ -7,6 +7,7 @@ use pocketmine\command\CommandSender;
 use pocketmine\command\PluginIdentifiableCommand;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
+use ProjectInfinity\PocketVote\task\guru\SetLinkNameTask;
 
 class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
 
@@ -164,6 +165,14 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                     default:
                         $sender->sendMessage(TextFormat::RED.'Invalid option. Use list, add or remove.');
                 }
+                break;
+
+            case 'LINK':
+                if(count($args) < 2) {
+                    $sender->sendMessage(TextFormat::RED.'You need to specify a name. /pv link [name]');
+                    return true;
+                }
+                $this->getPlugin()->getServer()->getScheduler()->scheduleAsyncTask(new SetLinkNameTask($sender->getName(), $args[1]));
                 break;
 
             default:
