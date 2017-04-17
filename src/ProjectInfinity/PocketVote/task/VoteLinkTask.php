@@ -71,6 +71,12 @@ class VoteLinkTask extends AsyncTask {
             return;
         }
 
+        # Invalid response.
+        if(!$result) {
+            $server->getLogger()->error('[PocketVote] The response from MCPE.Guru was not valid JSON.');
+            return;
+        }
+
         if(!$result->success) {
             $server->getLogger()->warning('[PocketVote] Server not found when attempting to retrieve vote link, is your identity correct?');
             return;
