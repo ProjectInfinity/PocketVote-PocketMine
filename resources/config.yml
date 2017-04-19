@@ -13,8 +13,6 @@ multi-server:
     password: 'pocketvote'
     database: 'pocketvote'
 onvote:
-  run-cmd:
-  - 'say Thanks for voting for us at %site, %player!'
-  online-cmd:
-  - 'tell %player Thank you for voting for us.'
+  run-cmd: []
+  online-cmd: []
 votes: []
