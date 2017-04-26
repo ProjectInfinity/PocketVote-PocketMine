@@ -83,6 +83,7 @@ class AddLinkTask extends GuruTask {
 
         if($result->success) {
             $player->sendMessage(TextFormat::GREEN.'Link added!');
+            if(isset($result->payload->url) && PocketVote::getPlugin()->getVoteManager()->getVoteLink() === null) PocketVote::getPlugin()->getVoteManager()->setVoteLink($result->payload->url);
             return;
         }
     }
