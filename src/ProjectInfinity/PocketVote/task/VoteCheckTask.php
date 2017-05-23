@@ -64,7 +64,7 @@ class VoteCheckTask extends AsyncTask {
             }
 
             if($result->success && isset($result->payload)) {
-                JWT::$leeway = 54000;
+                JWT::$leeway = 120;
                 try {
                     $decoded = JWT::decode($result->payload, $this->secret, array('HS256'));
                 } catch(\Exception $e) {

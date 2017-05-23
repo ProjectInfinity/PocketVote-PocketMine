@@ -78,6 +78,7 @@ class DiagnoseTask extends AsyncTask {
             $player->sendMessage(($result->payload->hasVotes ? TextFormat::GREEN.'✔' : TextFormat::RED.'✖').' Has votes (trivial)');
 
             try {
+                JWT::$leeway = 60;
                 $token = JWT::decode($result->payload->voteSample, $this->secret, array('HS256'));
                 if($token->player === 'PocketVoteSample' && $token->ip === '127.0.0.1' && $token->site === 'PocketVote.io') {
                     $player->sendMessage((TextFormat::GREEN.'✔').' Decode sample vote');
