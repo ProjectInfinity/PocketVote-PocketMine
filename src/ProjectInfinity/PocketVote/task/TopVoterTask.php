@@ -39,9 +39,11 @@ class TopVoterTask extends AsyncTask {
 
         if($res === false) {
             $this->setResult((object)['success' => false, 'error' => curl_error($curl)]);
+            curl_close($curl);
             return;
         }
 
+        curl_close($curl);
         $this->setResult(json_decode($res));
     }
 

@@ -8,6 +8,7 @@ use pocketmine\command\PluginIdentifiableCommand;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
 use ProjectInfinity\PocketVote\task\guru\SetLinkNameTask;
+use ProjectInfinity\PocketVote\task\DiagnoseTask;
 
 class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
 
@@ -24,7 +25,7 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
             return true;
         }
         if(count($args) === 0) {
-            $sender->sendMessage(TextFormat::AQUA.'Specify an action: SECRET, IDENTITY, CMD, CMDO');
+            $sender->sendMessage(TextFormat::AQUA.'Specify an action: SECRET, IDENTITY, DIAGNOSE, CMD, CMDO, LINK');
             return true;
         }
         switch(strtoupper($args[0])) {
@@ -57,6 +58,11 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                 $sender->sendMessage(TextFormat::GREEN.'Successfully set secret.');
                 $this->plugin->getConfig()->set('secret', $this->plugin->secret);
                 $this->plugin->saveConfig();
+                break;
+
+            case 'DIAGNOSE':
+                $sender->sendMessage(TextFormat::GREEN.'Scheduling a diagnosis...');
+                $this->plugin->getServer()->getScheduler()->scheduleAsyncTask(new DiagnoseTask($this->plugin->getDescription()->getVersion(), $sender->getName()));
                 break;
 
             case 'CMD':
@@ -176,7 +182,7 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                 break;
 
             default:
-                $sender->sendMessage(TextFormat::RED.'Invalid option. Specify SECRET, IDENTITY, CMD or CMDO.');
+                $sender->sendMessage(TextFormat::RED.'Invalid option. Specify SECRET, IDENTITY, DIAGNOSE, CMD, CMDO or LINK.');
         }
         return true;
     }
