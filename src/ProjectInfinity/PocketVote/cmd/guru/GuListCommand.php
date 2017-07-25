@@ -15,7 +15,7 @@ class GuListCommand extends Command {
         $this->plugin = $plugin;
     }
 
-    public function execute(CommandSender $sender, $commandLabel, array $args) {
+    public function execute(CommandSender $sender, String $commandLabel, array $args) {
         if(!$sender->hasPermission('pocketvote.admin')) {
             $sender->sendMessage(TextFormat::RED.'You do not have permission to do that.');
             return true;
