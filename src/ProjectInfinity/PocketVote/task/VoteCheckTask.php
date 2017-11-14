@@ -93,7 +93,8 @@ class VoteCheckTask extends AsyncTask {
                         return;
                     }
                     $time = time();
-                    foreach($votes as $vote) {
+                    foreach($r->getVotes() as $vote) {
+                        if($vote->player === null || $vote->site === null) continue;
                         $stmt = $db->prepare('INSERT INTO `pocketvote_votes` (`player`, `ip`, `site`, `timestamp`) VALUES (?, ?, ?, ?)');
                         $stmt->bind_param('sssi', $vote->player, $vote->ip, $vote->site, $time);
                         $stmt->execute();
