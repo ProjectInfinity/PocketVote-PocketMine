@@ -46,3 +46,4 @@ fabric.properties
 
 cacert.pem
 /config.yml
+vrc/

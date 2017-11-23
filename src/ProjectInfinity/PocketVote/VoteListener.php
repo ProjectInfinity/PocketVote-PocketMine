@@ -51,6 +51,7 @@ class VoteListener implements Listener {
      * @priority LOWEST
      */
     public function onPlayerJoin(PlayerJoinEvent $event) {
+        if(PocketVote::$hasVRC) $this->vm->scheduleVRCTask($event->getPlayer()->getName()); # TODO: This should be possible to disable and only allow through commands.
         if(!$this->vm->hasVotes($event->getPlayer()->getName())) return;
 
         $sender = new ConsoleCommandSender();

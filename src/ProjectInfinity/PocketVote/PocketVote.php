@@ -35,6 +35,7 @@ class PocketVote extends PluginBase {
     
     public static $cert;
     public static $dev;
+    public static $hasVRC;
 
     /** @var VoteManager $voteManager */
     private $voteManager;
@@ -127,6 +128,25 @@ class PocketVote extends PluginBase {
         $this->getServer()->getCommandMap()->register('gulist', new GuListCommand($this));
 
         $this->getServer()->getPluginManager()->registerEvents(new VoteListener($this), $this);
+
+        # Check if the VRC folder exists for legacy voting sites.
+        if(file_exists($this->getDataFolder().'vrc')) {
+            $this->getLogger()->info(TextFormat::GOLD.'VRC folder found, to enable sites that support VRC files. Place them in the plugins/PocketVote/vrc folder and ensure the file name ends with .vrc');
+            $vrcFiles = glob($this->getDataFolder().'vrc/*.{vrc}', GLOB_BRACE);
+            foreach($vrcFiles as $file) {
+                $fh = fopen($file, 'rb');
+                $raw = fread($fh, filesize($file));
+                fclose($fh);
+                $data = json_decode($raw);
+                if(!$raw || !$data) {
+                    $this->getLogger()->warning(TextFormat::RED.'VRC file '.$file.' could not be read.');
+                    continue;
+                }
+                $this->voteManager->addVRC((object)['website' => $data->website, 'check' => $data->check, 'claim' => $data->claim]);
+                self::$hasVRC = true;
+                $this->getLogger()->info(TextFormat::GREEN.'VRC enabled for '.$data->website);
+            }
+        }
 
         $this->schedulerTask = $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 1200); # 1200 ticks = 60 seconds.
         # Get voting link.
