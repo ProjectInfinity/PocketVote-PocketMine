@@ -38,14 +38,14 @@ class VRCCheckTask extends AsyncTask {
             $res = curl_exec($curl);
 
             if($res === false) {
-                $results[] = $this->createResult(true, null, curl_error($curl));
+                $results[] = $this->createResult(true, curl_error($curl));
                 curl_close($curl);
             } else {
 
                 $result = json_decode($res);
 
                 if(!isset($result->voted) || !isset($result->claimed)) {
-                    $results[] = $this->createResult(true, ['message' => 'Vote or claim field was missing in response from '.$url['host']]);
+                    $results[] = $this->createResult(true, 'Vote or claim field was missing in response from '.$url['host']);
                     $this->setResult($results);
                     curl_close($curl);
                     return;
@@ -72,7 +72,7 @@ class VRCCheckTask extends AsyncTask {
                     $res = curl_exec($curl);
 
                     if($res === false) {
-                        $results[] = $this->createResult(true, null, curl_error($curl));
+                        $results[] = $this->createResult(true, curl_error($curl));
                         curl_close($curl);
                     } else {
 
@@ -80,14 +80,14 @@ class VRCCheckTask extends AsyncTask {
                         curl_close($curl);
 
                         if(!isset($result->voted) || !isset($result->claimed)) {
-                            $results[] = $this->createResult(true, ['message' => 'Vote or claim field was missing in response from '.$url['host']]);
+                            $results[] = $this->createResult(true, 'Vote or claim field was missing in response from '.$url['host']);
                             $this->setResult($results);
                             return;
                         }
 
                         # Claim failed.
                         if($result->voted && !$result->claimed) {
-                            $results[] = $this->createResult(true, ['message' => 'Attempted to claim a vote but it failed. Site: '.$url['host']]);
+                            $results[] = $this->createResult(true, 'Attempted to claim a vote but it failed. Site: '.$url['host']);
                             $this->setResult($results);
                             return;
                         }
@@ -110,20 +110,11 @@ class VRCCheckTask extends AsyncTask {
         $this->setResult($results);
     }
 
-    private function createResult($error, $res, $customError = null) {
+    private function createResult($error, $res) {
         $r = new TaskResult();
         $r->setError($error);
         if($error) {
-            if($res === null) {
-                $r->setErrorData(['message' => 'Failed to contact a vote site.']);
-            } else {
-                if(!isset($customError)) {
-                    $r->setErrorData(['message' => $res->message]);
-                }
-                else {
-                    $r->setErrorData(['message' => $customError]);
-                }
-            }
+            $r->setErrorData(['message' => $res]);
         }
         # Had votes.
         if(isset($res->payload) && $res->success) $r->setVotes($res->payload);
@@ -147,7 +138,7 @@ class VRCCheckTask extends AsyncTask {
 
         foreach($results as $result) {
             if((object) $result->hasError()) {
-                $server->getLogger()->error('[PocketVote] VRCCheckTask: An issue occurred talking to a vote site.');
+                $server->getLogger()->error('[PocketVote] VRCCheckTask an issue occurred:'.$result->getError()['message']);
                 return;
             }
             $vote = (object) $result->getVotes();
