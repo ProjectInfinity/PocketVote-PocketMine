@@ -115,11 +115,15 @@ class VRCCheckTask extends AsyncTask {
         $r = new TaskResult();
         $r->setError($error);
         if($error) {
-            if(!isset($customError)) {
-                $r->setErrorData(['message' => $res->message]);
-            }
-            else {
-                $r->setErrorData(['message' => $customError]);
+            if($res === null) {
+                $r->setErrorData(['message' => 'Failed to contact a vote site.']);
+            } else {
+                if(!isset($customError)) {
+                    $r->setErrorData(['message' => $res->message]);
+                }
+                else {
+                    $r->setErrorData(['message' => $customError]);
+                }
             }
         }
         # Had votes.
@@ -143,6 +147,10 @@ class VRCCheckTask extends AsyncTask {
         }
 
         foreach($results as $result) {
+            if((object) $result->hasError()) {
+                $server->getLogger()->error('[PocketVote] VRCCheckTask: An issue occurred talking to a vote site.');
+                return;
+            }
             $vote = (object) $result->getVotes();
             $server->getPluginManager()->callEvent(
                 new VoteEvent(PocketVote::getPlugin(),
