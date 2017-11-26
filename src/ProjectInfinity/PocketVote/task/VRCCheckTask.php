@@ -5,7 +5,6 @@ namespace ProjectInfinity\PocketVote\task;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use ProjectInfinity\PocketVote\data\TaskResult;
-use ProjectInfinity\PocketVote\data\VRCRecord;
 use ProjectInfinity\PocketVote\event\VoteEvent;
 use ProjectInfinity\PocketVote\PocketVote;
 
