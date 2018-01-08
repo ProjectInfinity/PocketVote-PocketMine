@@ -44,6 +44,13 @@ class VRCCheckTask extends AsyncTask {
 
                 $result = json_decode($res);
 
+                if(empty($result) || \is_string($result)) {
+                    $results[] = $this->createResult(true, 'Failed to parse JSON response from '.$url['host'].'. This is likely a problem with the mentioned site.');
+                    $this->setResult($results);
+                    curl_close($curl);
+                    return;
+                }
+
                 if(!isset($result->voted) || !isset($result->claimed)) {
                     $results[] = $this->createResult(true, 'Vote or claim field was missing in response from '.$url['host']);
                     $this->setResult($results);
@@ -138,7 +145,7 @@ class VRCCheckTask extends AsyncTask {
 
         foreach($results as $result) {
             if((object) $result->hasError()) {
-                $server->getLogger()->error('[PocketVote] VRCCheckTask an issue occurred:'.$result->getError()['message']);
+                $server->getLogger()->error('[PocketVote] VRCCheckTask: An issue occurred, you can ignore this unless it happens often: '.$result->getError()['message']);
                 return;
             }
             $vote = (object) $result->getVotes();
