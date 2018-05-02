@@ -30,7 +30,7 @@ class DiagnoseTask extends AsyncTask {
 
         if($this->identity === null) return;
 
-        $curl = curl_init($this->isDev ? 'http://127.0.0.1/v2/diagnose' : 'https://api.pocketvote.io/v2/diagnose');
+        $curl = curl_init($this->isDev ? 'http://127.0.0.1:9000/v2/diagnose' : 'https://api.pocketvote.io/v2/diagnose');
 
         curl_setopt_array($curl, [
             CURLOPT_RETURNTRANSFER => 1,
