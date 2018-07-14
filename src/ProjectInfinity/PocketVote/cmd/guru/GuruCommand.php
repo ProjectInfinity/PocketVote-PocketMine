@@ -9,7 +9,7 @@ use pocketmine\utils\TextFormat;
 class GuruCommand extends Command {
 
     public function __construct() {
-        parent::__construct('guru', 'MCPE Guru help command', '/guru [subject]', ['gu']);
+        parent::__construct('guru', 'MCPE Guru help command', '/guru', ['gu']);
     }
 
     public function execute(CommandSender $sender, String $commandLabel, array $args) {

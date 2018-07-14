@@ -20,7 +20,7 @@ class GuListCommand extends Command {
             $sender->sendMessage(TextFormat::RED.'You do not have permission to do that.');
             return true;
         }
-        PocketVote::getPlugin()->getServer()->getScheduler()->scheduleAsyncTask(new GetLinksTask($sender->getName()));
+        PocketVote::getPlugin()->getServer()->getAsyncPool()->submitTask(new GetLinksTask($sender->getName()));
         return true;
     }
 }

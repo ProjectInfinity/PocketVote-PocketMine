@@ -46,7 +46,7 @@ class HeartbeatTask extends AsyncTask {
 
         if($this->secret === null || $this->identity === null) return;
 
-        $curl = curl_init($this->isDev ? 'http://127.0.0.1/v2/heartbeat' : 'https://api.pocketvote.io/v2/heartbeat');
+        $curl = curl_init($this->isDev ? 'http://127.0.0.1:9000/v2/heartbeat' : 'https://api.pocketvote.io/v2/heartbeat');
 
         curl_setopt_array($curl, [
             CURLOPT_RETURNTRANSFER => 1,

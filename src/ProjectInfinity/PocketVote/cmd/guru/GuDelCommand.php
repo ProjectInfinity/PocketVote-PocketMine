@@ -33,7 +33,7 @@ class GuDelCommand extends Command {
             return true;
         }
 
-        $this->plugin->getServer()->getScheduler()->scheduleAsyncTask(new DeleteLinkTask($sender->getName(), (int)$args[0]));
+        $this->plugin->getServer()->getAsyncPool()->submitTask(new DeleteLinkTask($sender->getName(), (int)$args[0]));
         return true;
     }
 }

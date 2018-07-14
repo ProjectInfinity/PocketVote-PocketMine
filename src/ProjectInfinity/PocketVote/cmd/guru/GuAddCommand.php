@@ -55,7 +55,7 @@ class GuAddCommand extends Command {
                 break;
         }
 
-        $this->plugin->getServer()->getScheduler()->scheduleAsyncTask(new AddLinkTask($sender->getName(), $title, $link));
+        $this->plugin->getServer()->getAsyncPool()->submitTask(new AddLinkTask($sender->getName(), $title, $link));
         return true;
     }
 }

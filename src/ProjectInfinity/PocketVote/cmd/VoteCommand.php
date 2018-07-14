@@ -25,7 +25,7 @@ class VoteCommand extends Command implements PluginIdentifiableCommand {
             return true;
         }
         if(isset($args[0]) && strtoupper($args[0]) === 'TOP') {
-            $this->plugin->getServer()->getScheduler()->scheduleAsyncTask(new TopVoterTask($this->plugin->identity, $sender->getName()));
+            $this->plugin->getServer()->getAsyncPool()->submitTask(new TopVoterTask($this->plugin->identity, $sender->getName()));
             return true;
         }
         $link = $this->plugin->getVoteManager()->getVoteLink();

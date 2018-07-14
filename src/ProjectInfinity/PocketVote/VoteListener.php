@@ -20,6 +20,7 @@ class VoteListener implements Listener {
 
     /**
      * @priority LOWEST
+     * @param VoteEvent $event
      */
     public function onVoteEvent(VoteEvent $event) {
         if($event->isCancelled()) return;
@@ -49,6 +50,7 @@ class VoteListener implements Listener {
 
     /**
      * @priority LOWEST
+     * @param PlayerJoinEvent $event
      */
     public function onPlayerJoin(PlayerJoinEvent $event) {
         if(PocketVote::$hasVRC) $this->vm->scheduleVRCTask($event->getPlayer()->getName()); # TODO: This should be possible to disable and only allow through commands.

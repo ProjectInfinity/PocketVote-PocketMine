@@ -63,7 +63,7 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
 
             case 'DIAGNOSE':
                 $sender->sendMessage(TextFormat::GREEN.'Scheduling a diagnosis...');
-                $this->plugin->getServer()->getScheduler()->scheduleAsyncTask(new DiagnoseTask($this->plugin->getDescription()->getVersion(), $sender->getName()));
+                $this->plugin->getServer()->getAsyncPool()->submitTask(new DiagnoseTask($this->plugin->getDescription()->getVersion(), $sender->getName()));
                 break;
 
             case 'CMD':
@@ -179,7 +179,7 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage(TextFormat::RED.'You need to specify a name. /pv link [name]');
                     return true;
                 }
-                $this->getPlugin()->getServer()->getScheduler()->scheduleAsyncTask(new SetLinkNameTask($sender->getName(), $args[1]));
+                $this->getPlugin()->getServer()->getAsyncPool()->submitTask(new SetLinkNameTask($sender->getName(), $args[1]));
                 break;
 
             default:

@@ -53,7 +53,7 @@ class VoteEvent extends PluginEvent implements Cancellable {
      * 
      * @return bool
      */
-    public function isOnline() {
+    public function isOnline(): bool {
         return Server::getInstance()->getPlayer($this->player) !== null;    
     }
 

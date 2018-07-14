@@ -2,35 +2,49 @@
 
 namespace ProjectInfinity\PocketVote\event;
 
+use pocketmine\event\Cancellable;
+use pocketmine\event\plugin\PluginEvent;
+use pocketmine\Server;
 use ProjectInfinity\PocketVote\PocketVote;
 
-class VoteDispatchEvent extends VoteEvent {
+class VoteDispatchEvent extends PluginEvent implements Cancellable {
 
     public static $handlerList = null;
 
+    private $player, $ip, $site;
+
     public function __construct(PocketVote $plugin, $player, $ip, $site) {
-        parent::__construct($plugin, $player, $ip, $site);
+        parent::__construct($plugin);
+        $this->player = $player;
+        $this->ip = $ip;
+        $this->site = $site;
     }
 
     /**
-     * @return string
+     * Returns the player that voted.
+     *
+     * @return mixed
      */
     public function getPlayer() {
-        return parent::getPlayer();
+        return $this->player;
     }
 
     /**
-     * @return string
+     * Get the IP of the player that voted.
+     *
+     * @return mixed
      */
     public function getIp() {
-        return parent::getIp();
+        return $this->ip;
     }
 
     /**
-     * @return string
+     * Get the site the player voted on.
+     *
+     * @return mixed
      */
     public function getSite() {
-        return parent::getSite();
+        return $this->site;
     }
 
 }

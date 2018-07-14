@@ -148,15 +148,15 @@ class PocketVote extends PluginBase {
             }
         }
 
-        $this->schedulerTask = $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 1200); # 1200 ticks = 60 seconds.
+        $this->schedulerTask = $this->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 1200); # 1200 ticks = 60 seconds.
         # Get voting link.
-        $this->getServer()->getScheduler()->scheduleAsyncTask(new VoteLinkTask($this->identity));
+        $this->getServer()->getAsyncPool()->submitTask(new VoteLinkTask($this->identity));
         # Report usage.
-        $this->getServer()->getScheduler()->scheduleAsyncTask(new HeartbeatTask($this->identity));
+        $this->getServer()->getAsyncPool()->submitTask(new HeartbeatTask($this->identity));
     }
 
     public function onDisable() {
-        $this->getServer()->getScheduler()->cancelTasks($this);
+        $this->getScheduler()->cancelAllTasks();
         self::$plugin = null;
         self::$cert = null;
         self::$dev = null;
@@ -183,7 +183,7 @@ class PocketVote extends PluginBase {
         if(!$this->schedulerTask->isCancelled()) $this->schedulerTask->cancel();
 
         $this->schedulerTs = $time;
-        $this->schedulerTask = $this->getServer()->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), $seconds > 0 ? ($seconds * 20) : 1200);
+        $this->schedulerTask = $this->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), $seconds > 0 ? ($seconds * 20) : 1200);
         $this->schedulerFreq = $seconds;
 
         $this->getLogger()->debug("Scheduler interval changed to $seconds seconds.");
