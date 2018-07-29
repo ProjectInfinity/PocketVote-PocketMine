@@ -44,7 +44,7 @@ class VoteManager {
         if((PocketVote::$hasVRC && !$this->plugin->multiserver) || (PocketVote::$hasVRC && $this->plugin->multiserver && $this->plugin->multiserver_role === 'master')) {
             if(isset($this->currentVRCTasks[$player])) return;
             # Only run when VRC is enabled and multiserver is off or VRC is enabled and multiserver and server role is set to master.
-            $this->plugin->getScheduler()->scheduleAsyncTask(new VRCCheckTask($player));
+            $this->plugin->getServer()->getAsyncPool()->submitTask(new VRCCheckTask($player));
         }
     }
 
