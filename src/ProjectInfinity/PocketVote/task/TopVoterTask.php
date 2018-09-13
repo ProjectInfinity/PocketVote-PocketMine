@@ -20,7 +20,7 @@ class TopVoterTask extends AsyncTask {
         $this->version = PocketVote::getPlugin()->getDescription()->getVersion();
     }
 
-    public function onRun() {
+    public function onRun() : void {
         $curl = curl_init($this->isDev ? 'http://127.0.0.1/v2/top/10' : 'https://api.pocketvote.io/v2/top/10');
 
         curl_setopt_array($curl, [
@@ -47,7 +47,7 @@ class TopVoterTask extends AsyncTask {
         $this->setResult(json_decode($res));
     }
 
-    public function onCompletion(Server $server) {
+    public function onCompletion(Server $server) : void {
         $player = $this->player === 'CONSOLE' ? new ConsoleCommandSender() : $server->getPlayer($this->player);
         if($player === null) return;
 
