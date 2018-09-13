@@ -42,7 +42,7 @@ class HeartbeatTask extends AsyncTask {
         ];
     }
 
-    public function onRun() {
+    public function onRun() : void {
 
         if($this->secret === null || $this->identity === null) return;
 
