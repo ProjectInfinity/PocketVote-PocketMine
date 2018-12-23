@@ -45,7 +45,7 @@ class PocketVote extends PluginBase {
     private $schedulerTs;
     private $schedulerFreq = 60;
 
-    public function onEnable() {
+    public function onEnable(): void {
         self::$plugin = $this;
         $this->saveDefaultConfig();
         $this->updateConfig();
@@ -122,7 +122,7 @@ class PocketVote extends PluginBase {
         $this->getServer()->getCommandMap()->register('pocketvote', new VoteCommand($this));
 
         ### MCPE Guru commands ###
-        $this->getServer()->getCommandMap()->register('pocketvote', new GuruCommand($this));
+        $this->getServer()->getCommandMap()->register('pocketvote', new GuruCommand());
         $this->getServer()->getCommandMap()->register('pocketvote', new GuAddCommand($this));
         $this->getServer()->getCommandMap()->register('pocketvote', new GuDelCommand($this));
         $this->getServer()->getCommandMap()->register('pocketvote', new GuListCommand($this));
@@ -152,10 +152,10 @@ class PocketVote extends PluginBase {
         # Get voting link.
         $this->getServer()->getAsyncPool()->submitTask(new VoteLinkTask($this->identity));
         # Report usage.
-        $this->getServer()->getAsyncPool()->submitTask(new HeartbeatTask($this->identity));
+        if(!$this->getConfig()->get('opt-out-usage', false)) $this->getServer()->getAsyncPool()->submitTask(new HeartbeatTask($this->identity));
     }
 
-    public function onDisable() {
+    public function onDisable(): void {
         $this->getScheduler()->cancelAllTasks();
         self::$plugin = null;
         self::$cert = null;
@@ -171,12 +171,12 @@ class PocketVote extends PluginBase {
         return $this->voteManager;
     }
 
-    public function stopScheduler() {
+    public function stopScheduler(): void {
         if($this->schedulerTask->isCancelled()) return;
         $this->schedulerTask->cancel();
     }
 
-    public function startScheduler(int $seconds) {
+    public function startScheduler(int $seconds): void {
         $time = time();
         # Ensure that at least 5 minutes has passed since we last changed frequency and check that the frequency is different from before.
         if($time - $this->schedulerTs < 300 || $this->schedulerFreq === $seconds) return;
@@ -189,7 +189,7 @@ class PocketVote extends PluginBase {
         $this->getLogger()->debug("Scheduler interval changed to $seconds seconds.");
     }
 
-    public function updateConfig() {
+    public function updateConfig(): void {
         if($this->getConfig()->get('version', 0) === 0) {
             $this->getLogger()->info(TextFormat::YELLOW.'Migrating config to version 1.');
             $this->getConfig()->set('version', 1);
@@ -228,6 +228,12 @@ class PocketVote extends PluginBase {
             $this->getConfig()->set('votes', $votes);
             $this->getConfig()->set('vote-expiration', 7);
             $this->getConfig()->set('version', 4);
+            $this->saveConfig();
+        }
+        if($this->getConfig()->get('version', 0) === 4) {
+            $this->getLogger()->info(TextFormat::YELLOW.'Migrating config to version 5.');
+            $this->getConfig()->setNested('multi-server.use-pocketvote-sync', true);
+            $this->getConfig()->set('opt-out-usage', false);
             $this->saveConfig();
         }
     }
