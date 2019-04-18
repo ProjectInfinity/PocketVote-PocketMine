@@ -32,6 +32,7 @@ class VRCCheckTask extends AsyncTask {
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2,
                 CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
+                CURLOPT_USERAGENT => 'PocketVote VRC',
                 CURLOPT_CAINFO => $this->cert
             ]);
 

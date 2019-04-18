@@ -46,7 +46,7 @@ class VoteCheckTask extends AsyncTask {
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
             CURLOPT_CAINFO => $this->cert,
-            CURLOPT_USERAGENT => 'PocketVote v'.$this->version,
+            CURLOPT_USERAGENT => 'PocketVote '.$this->version,
             CURLOPT_HTTPHEADER => ['Identity: '.$this->identity]
         ]);
 
