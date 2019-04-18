@@ -3,7 +3,6 @@
 namespace ProjectInfinity\PocketVote;
 
 use jojoe77777\FormAPI\CustomForm;
-use jojoe77777\FormAPI\FormAPI;
 use pocketmine\command\ConsoleCommandSender;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerJoinEvent;

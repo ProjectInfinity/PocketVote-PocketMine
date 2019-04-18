@@ -137,7 +137,7 @@ class PocketVote extends PluginBase {
                 $fh = fopen($file, 'rb');
                 $raw = fread($fh, filesize($file));
                 fclose($fh);
-                $data = json_decode($raw);
+                $data = json_decode($raw, false);
                 if(!$raw || !$data) {
                     $this->getLogger()->warning(TextFormat::RED.'VRC file '.$file.' could not be read.');
                     continue;

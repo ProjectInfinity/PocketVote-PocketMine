@@ -72,6 +72,12 @@ class TopVoterTask extends AsyncTask {
         $player->sendMessage(TextFormat::AQUA.'### Current top 10 voters ###');
         $rank = 1;
         $color = true;
+
+        if(!isset($result->payload)) {
+            $player->sendMessage(TextFormat::RED.'Error! No payload.');
+            return;
+        }
+
         foreach($result->payload as $voter) {
             $player->sendMessage(($color ? TextFormat::WHITE : TextFormat::GRAY).$rank.'. '.$voter->player.' ('.$voter->votes.')');
             $rank++;
