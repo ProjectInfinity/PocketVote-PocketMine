@@ -21,7 +21,7 @@ class VoteLinkTask extends AsyncTask {
         $this->version = PocketVote::getPlugin()->getDescription()->getVersion();
     }
 
-    public function onRun() {
+    public function onRun() : void {
         $curl = curl_init($this->isDev ? 'http://dev.mcpe.guru/api/link' : 'https://mcpe.guru/api/link');
 
         curl_setopt_array($curl, [
@@ -56,7 +56,7 @@ class VoteLinkTask extends AsyncTask {
         curl_close($curl);
     }
 
-    public function onCompletion(Server $server) {
+    public function onCompletion(Server $server) : void {
         $server->getLogger()->debug('[PocketVote] Attempting to retrieve vote link.');
 
         if(!$this->hasResult()) {

@@ -26,7 +26,7 @@ class DiagnoseTask extends AsyncTask {
         $this->player = $player;
     }
 
-    public function onRun() {
+    public function onRun() : void {
 
         if($this->identity === null) return;
 
@@ -56,7 +56,7 @@ class DiagnoseTask extends AsyncTask {
         $this->setResult(json_decode($res));
     }
 
-    public function onCompletion(Server $server) {
+    public function onCompletion(Server $server) : void {
         $player = $this->player === 'CONSOLE' ? new ConsoleCommandSender() : $server->getPlayer($this->player);
         if($player === null) return;
 

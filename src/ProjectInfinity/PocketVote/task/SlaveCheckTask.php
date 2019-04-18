@@ -23,7 +23,7 @@ class SlaveCheckTask extends AsyncTask {
         $this->hash = md5(PocketVote::getPlugin()->getServer()->getIp().PocketVote::getPlugin()->getServer()->getPort());
     }
 
-    public function onRun() {
+    public function onRun() : void {
 
         $db = new \mysqli($this->mysql_host, $this->mysql_username, $this->mysql_password, $this->mysql_database, $this->mysql_port);
         # Ensure we are actually connected.
@@ -81,7 +81,7 @@ class SlaveCheckTask extends AsyncTask {
 
     }
 
-    public function onCompletion(Server $server) {
+    public function onCompletion(Server $server) :void {
 
         if(!$this->hasResult()) {
             $server->getLogger()->emergency('A database check failed.');
