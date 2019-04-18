@@ -26,10 +26,6 @@ class PocketVote extends PluginBase {
     public $secret;
     public $expiration;
 
-    public $multiserver;
-    public $multiserver_role;
-    public $mysql_host, $mysql_port, $mysql_username, $mysql_password, $mysql_database;
-
     public $cmds;
     public $cmdos;
     
@@ -82,33 +78,6 @@ class PocketVote extends PluginBase {
             }
 
             curl_close($curl);
-        }
-
-        $this->multiserver = $this->getConfig()->getNested('multi-server.enabled', false);
-        $this->multiserver_role = $this->getConfig()->getNested('multi-server.role', 'master');
-        $this->mysql_host = $this->getConfig()->getNested('multi-server.mysql.host', 'localhost');
-        $this->mysql_port = $this->getConfig()->getNested('multi-server.mysql.port', 3306);
-        $this->mysql_username = $this->getConfig()->getNested('multi-server.mysql.username', 'pocketvote');
-        $this->mysql_password = $this->getConfig()->getNested('multi-server.mysql.password', 'pocketvote');
-        $this->mysql_database = $this->getConfig()->getNested('multi-server.mysql.database', 'pocketvote');
-
-        if($this->multiserver) {
-            $db = new \mysqli($this->mysql_host, $this->mysql_username, $this->mysql_password, $this->mysql_database, $this->mysql_port);
-            # Ensure we are actually connected.
-            if(!$db->ping()) {
-                $this->getLogger()->critical('Failed to get connection to database.');
-            }
-
-            # Ensure tables exist.
-            $resource = $this->getResource('create_votes_table.sql');
-            $db->query(stream_get_contents($resource));
-            fclose($resource);
-            $resource = $this->getResource('create_checks_table.sql');
-            $db->query(stream_get_contents($resource));
-            fclose($resource);
-
-            # All done.
-            $db->close();
         }
 
         $this->identity = $this->getConfig()->get('identity', null);
@@ -230,12 +199,14 @@ class PocketVote extends PluginBase {
             $this->getConfig()->set('version', 4);
             $this->saveConfig();
         }
-        if($this->getConfig()->get('version', 0) === 4) {
-            $this->getLogger()->info(TextFormat::YELLOW.'Migrating config to version 5.');
-            $this->getConfig()->setNested('multi-server.use-pocketvote-sync', true);
+        $currentVersion = $this->getConfig()->get('version', 0);
+        if($currentVersion === 4 || $currentVersion === 5) {
+            $this->getLogger()->info(TextFormat::YELLOW.'Migrating config to version 6 (5 may have been skipped).');
+            $this->getConfig()->remove('multi-server');
             $this->getConfig()->set('opt-out-usage', false);
             $this->saveConfig();
         }
+        unset($currentVersion);
     }
 
 }

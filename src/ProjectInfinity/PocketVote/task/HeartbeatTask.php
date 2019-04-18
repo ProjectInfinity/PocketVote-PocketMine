@@ -35,8 +35,6 @@ class HeartbeatTask extends AsyncTask {
         $this->meta['serverPort'] = $plugin->getServer()->getPort();
         $this->meta['serverName'] = $plugin->getServer()->getName();
         $this->meta['pluginConfig'] = [
-            'multi-server' => $config->getNested('multi-server.enabled', false),
-            'multi-server-role' => $config->getNested('multi-server.role', 'master'),
             'lock' => $config->get('lock', false),
             'vote-expiration' => $config->get('vote-expiration', 7)
         ];

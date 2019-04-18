@@ -17,9 +17,6 @@ class VoteCheckTask extends AsyncTask {
     public $secret;
     public $version;
     public $cert;
-
-    public $multiserver;
-    public $mysql_host, $mysql_port, $mysql_username, $mysql_password, $mysql_database;
     
     public function __construct($identity, $secret, $version) {
         $this->isDev = PocketVote::$dev;
@@ -27,12 +24,6 @@ class VoteCheckTask extends AsyncTask {
         $this->secret = $secret;
         $this->version = $version;
         $this->cert = PocketVote::$cert;
-        $this->mysql_host = PocketVote::getPlugin()->mysql_host;
-        $this->mysql_port = PocketVote::getPlugin()->mysql_port;
-        $this->mysql_username = PocketVote::getPlugin()->mysql_username;
-        $this->mysql_password = PocketVote::getPlugin()->mysql_password;
-        $this->mysql_database = PocketVote::getPlugin()->mysql_database;
-        $this->multiserver = PocketVote::getPlugin()->multiserver;
     }
 
     public function onRun() {
@@ -84,26 +75,6 @@ class VoteCheckTask extends AsyncTask {
                 $r = $this->createResult(false, $result);
                 $r->setVotes($votes[0]);
                 $this->setResult($r);
-
-                if($this->multiserver && count($votes) > 0) {
-                    $db = new \mysqli($this->mysql_host, $this->mysql_username, $this->mysql_password, $this->mysql_database, $this->mysql_port);
-                    # Ensure we are actually connected.
-                    if(!$db->ping()) {
-                        curl_close($curl);
-                        return;
-                    }
-                    $time = time();
-                    foreach($r->getVotes() as $vote) {
-                        if($vote->player === null || $vote->site === null) continue;
-                        $stmt = $db->prepare('INSERT INTO `pocketvote_votes` (`player`, `ip`, `site`, `timestamp`) VALUES (?, ?, ?, ?)');
-                        $stmt->bind_param('sssi', $vote->player, $vote->ip, $vote->site, $time);
-                        $stmt->execute();
-                        $stmt->close();
-                    }
-
-                    # All done.
-                    $db->close();
-                }
             }
 
             # No outstanding votes.

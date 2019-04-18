@@ -4,16 +4,6 @@ secret: ''
 lock: false
 vote-expiration: 7
 opt-out-usage: false
-multi-server:
-  enabled: false
-  role: 'master'
-  use-pocketvote-sync: true
-  mysql:
-    host: 'localhost'
-    port: 3306
-    username: 'pocketvote'
-    password: 'pocketvote'
-    database: 'pocketvote'
 onvote:
   run-cmd: []
   online-cmd: []
