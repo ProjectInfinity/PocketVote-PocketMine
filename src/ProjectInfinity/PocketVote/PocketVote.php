@@ -204,6 +204,7 @@ class PocketVote extends PluginBase {
             $this->getLogger()->info(TextFormat::YELLOW.'Migrating config to version 6 (5 may have been skipped).');
             $this->getConfig()->remove('multi-server');
             $this->getConfig()->set('opt-out-usage', false);
+            $this->getConfig()->set('version', 6);
             $this->saveConfig();
         }
         unset($currentVersion);

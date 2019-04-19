@@ -2,13 +2,18 @@
 
 namespace ProjectInfinity\PocketVote\task\guru;
 
+use jojoe77777\FormAPI\CustomForm;
+use jojoe77777\FormAPI\ModalForm;
+use jojoe77777\FormAPI\SimpleForm;
 use pocketmine\command\ConsoleCommandSender;
+use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
 
 class GetLinksTask extends GuruTask {
 
+    /** @var Player */
     public $player;
 
     public function __construct($player) {
@@ -16,12 +21,16 @@ class GetLinksTask extends GuruTask {
         $this->player = $player;
     }
 
-    public function onRun() {
+    public function onRun(): void {
         parent::onRun();
     }
 
     public function onCompletion(Server $server) {
-        $player = $this->player === 'CONSOLE' ? new ConsoleCommandSender() : $server->getPlayer($this->player);
+        if($this->player === 'CONSOLE') {
+            $this->player->sendMessage(TextFormat::RED.'Console cannot manage links.');
+            return;
+        }
+        $player = $server->getPlayer($this->player);
 
         # Player is offline.
         if($player === null) return;
@@ -45,20 +54,48 @@ class GetLinksTask extends GuruTask {
             return;
         }
 
-        if($result->success && (!isset($result->payload) || $result->success && count($result->payload) === 0)) {
+        if($result->success && (!isset($result->payload) || ($result->success && count($result->payload) === 0))) {
             $player->sendMessage(TextFormat::YELLOW.'There are no added links, use '.TextFormat::AQUA.'/guadd [url]'.TextFormat::YELLOW.' to add a link!');
             return;
         }
 
-        $color = true;
+        $links = [];
         foreach($result->payload as $link) {
-            $c = $color ? TextFormat::AQUA : TextFormat::YELLOW;
+            $links[$link->id] = $link;
+        }
+
+        $selectedId = 0;
+        $selectedForm = new ModalForm(static function(Player $player, $delete) use(&$selectedId) {
+            if(!$delete) return;
+            PocketVote::getPlugin()->getServer()->dispatchCommand($player, 'gudel '.$selectedId);
+        });
+
+        $form = new SimpleForm(static function(Player $player, $id) use($links, $selectedForm, &$selectedId) {
+            if(!isset($links[$id])) return;
+            $link = $links[$id];
+            $selectedForm->setTitle($link->title);
+            $selectedForm->setContent($link->url);
+            $selectedForm->setButton1('Delete');
+            $selectedForm->setButton2('Cancel');
+
+            $selectedId = $link->id;
+            $player->sendForm($selectedForm);
+        });
+
+        $form->setTitle('Voting links');
+
+        //$color = true;
+        foreach($result->payload as $link) {
+            /*$c = $color ? TextFormat::AQUA : TextFormat::YELLOW;
             $player->sendMessage($c.'ID: '.$link->id);
             $player->sendMessage($c.'Title: '.$link->title);
             $player->sendMessage($c.'URL: '.$link->url);
 
-            $color = !$color;
+            $color = !$color;*/
+            $form->addButton($link->title, -1, '', $link->id);
         }
+
+        $player->sendForm($form);
 
     }
 }
