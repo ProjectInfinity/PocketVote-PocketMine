@@ -18,7 +18,7 @@ class DeleteLinkTask extends GuruTask {
             'DELETE');
     }
 
-    public function onRun() {
+    public function onRun(): void {
         parent::onRun();
     }
 

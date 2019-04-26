@@ -23,7 +23,7 @@ class AddLinkTask extends GuruTask {
         );
     }
 
-    public function onRun() {
+    public function onRun(): void {
         $ch = curl_init($this->link);
         curl_setopt_array($ch, [
             CURLOPT_SSL_VERIFYPEER => true,

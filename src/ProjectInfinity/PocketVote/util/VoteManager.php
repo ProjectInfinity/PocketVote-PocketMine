@@ -2,8 +2,11 @@
 
 namespace ProjectInfinity\PocketVote\util;
 
+use pocketmine\Player;
+use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
 use ProjectInfinity\PocketVote\task\ExpireVotesTask;
+use ProjectInfinity\PocketVote\task\guru\AddLinkTask;
 use ProjectInfinity\PocketVote\task\VRCCheckTask;
 
 class VoteManager {
@@ -53,6 +56,15 @@ class VoteManager {
 
     public function setVoteLink($link): void {
         $this->voteLink = $link;
+    }
+
+    public static function addLink(Player $player, ?array $data): void {
+        if(!$data) return;
+        if(!$data['url']) {
+            $player->sendForm(PocketVote::getPlugin()->getFormManager()->createLinkAddForm(true));
+            return;
+        }
+        PocketVote::getPlugin()->getServer()->getAsyncPool()->submitTask(new AddLinkTask($player->getName(), $data['title'] === '' ? $data['url'] : $data['title'], $data['url']));
     }
     
     public function hasVotes($player): bool {

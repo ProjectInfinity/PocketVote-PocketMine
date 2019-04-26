@@ -4,6 +4,8 @@ namespace ProjectInfinity\PocketVote\cmd\guru;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\command\ConsoleCommandSender;
+use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
 use ProjectInfinity\PocketVote\task\guru\AddLinkTask;
@@ -24,8 +26,14 @@ class GuAddCommand extends Command {
         }
 
         if(count($args) < 1) {
-            $sender->sendMessage(TextFormat::RED.'Not enough arguments, example: /guadd Title_Name http://example.com');
-            $sender->sendMessage(TextFormat::RED.'A title is optional but recommended.');
+            if($sender instanceof ConsoleCommandSender) {
+                $sender->sendMessage(TextFormat::RED.'Not enough arguments, example: /guadd Title_Name http://example.com');
+                $sender->sendMessage(TextFormat::RED.'A title is optional but recommended.');
+                return true;
+            }
+
+            /** @var Player $sender */
+            $sender->sendForm($this->plugin->getFormManager()->createLinkAddForm());
             return true;
         }
 
@@ -47,9 +55,9 @@ class GuAddCommand extends Command {
             case 2:
                 $s = mb_strtolower(mb_substr( $args[0], 0, 4 ));
                 if($s === 'http' || $s === 'www.') {
-                    list($link, $title) = $args;
+                    [$link, $title] = $args;
                 } else {
-                    list($title, $link) = $args;
+                    [$title, $link] = $args;
                 }
                 $s = null;
                 break;

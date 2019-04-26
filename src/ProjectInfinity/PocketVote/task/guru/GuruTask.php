@@ -25,7 +25,7 @@ class GuruTask extends AsyncTask {
         $this->postFields = $postFields;
     }
 
-    public function onRun() {
+    public function onRun(): void {
         $curl = curl_init($this->url);
 
         $options = [
@@ -58,7 +58,7 @@ class GuruTask extends AsyncTask {
         if($res === false) {
             $this->setResult((object)['error' => curl_error($curl)]);
         } else {
-            $result = json_decode($res);
+            $result = json_decode($res, false);
 
             # Check if result is valid JSON.
             if(empty($result)) {

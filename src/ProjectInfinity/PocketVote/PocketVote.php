@@ -14,7 +14,7 @@ use ProjectInfinity\PocketVote\cmd\VoteCommand;
 use ProjectInfinity\PocketVote\task\HeartbeatTask;
 use ProjectInfinity\PocketVote\task\SchedulerTask;
 use ProjectInfinity\PocketVote\task\VoteLinkTask;
-use ProjectInfinity\PocketVote\util\VoteManager;
+use ProjectInfinity\PocketVote\util\{VoteManager, FormManager};
 
 class PocketVote extends PluginBase {
 
@@ -35,6 +35,9 @@ class PocketVote extends PluginBase {
 
     /** @var VoteManager $voteManager */
     private $voteManager;
+
+    /** @var FormManager $formManager */
+    private $formManager;
 
     /** @var  TaskHandler $schedulerTask */
     private $schedulerTask;
@@ -87,6 +90,7 @@ class PocketVote extends PluginBase {
         $this->lock = $this->getConfig()->get('lock', false);
         $this->expiration = 86400 * $this->getConfig()->get('vote-expiration', 7);
         $this->voteManager = new VoteManager($this);
+        $this->formManager = new FormManager($this);
         $this->getServer()->getCommandMap()->register('pocketvote', new PocketVoteCommand($this));
         $this->getServer()->getCommandMap()->register('pocketvote', new VoteCommand($this));
 
@@ -138,6 +142,10 @@ class PocketVote extends PluginBase {
     
     public function getVoteManager(): VoteManager {
         return $this->voteManager;
+    }
+
+    public function getFormManager(): FormManager {
+        return $this->formManager;
     }
 
     public function stopScheduler(): void {

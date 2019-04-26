@@ -2,10 +2,8 @@
 
 namespace ProjectInfinity\PocketVote\task\guru;
 
-use jojoe77777\FormAPI\CustomForm;
 use jojoe77777\FormAPI\ModalForm;
 use jojoe77777\FormAPI\SimpleForm;
-use pocketmine\command\ConsoleCommandSender;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -25,7 +23,7 @@ class GetLinksTask extends GuruTask {
         parent::onRun();
     }
 
-    public function onCompletion(Server $server) {
+    public function onCompletion(Server $server): void {
         if($this->player === 'CONSOLE') {
             $this->player->sendMessage(TextFormat::RED.'Console cannot manage links.');
             return;
