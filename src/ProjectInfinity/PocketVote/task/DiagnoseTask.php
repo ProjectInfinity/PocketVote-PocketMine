@@ -53,7 +53,11 @@ class DiagnoseTask extends AsyncTask {
         }
 
         curl_close($curl);
-        $this->setResult(json_decode($res));
+        $json = json_decode($res, false);
+        if(!$json) {
+            $json = (object) ['success' => false, 'error' => 'API did not return valid JSON'];
+        }
+        $this->setResult($json);
     }
 
     public function onCompletion(Server $server) {
