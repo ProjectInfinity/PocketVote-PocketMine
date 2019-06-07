@@ -3,7 +3,6 @@
 namespace ProjectInfinity\PocketVote\util;
 
 use pocketmine\Player;
-use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
 use ProjectInfinity\PocketVote\task\ExpireVotesTask;
 use ProjectInfinity\PocketVote\task\guru\AddLinkTask;

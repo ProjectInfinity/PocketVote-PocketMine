@@ -5,11 +5,13 @@ namespace ProjectInfinity\PocketVote\cmd;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\PluginIdentifiableCommand;
+use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
 use ProjectInfinity\PocketVote\task\guru\SetLinkNameTask;
 use ProjectInfinity\PocketVote\task\DiagnoseTask;
+use ProjectInfinity\PocketVote\util\FormManager;
 
 class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
 
@@ -25,10 +27,16 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
             $sender->sendMessage(TextFormat::RED.'You do not have permission to administer PocketVote.');
             return true;
         }
+
         if(count($args) === 0) {
+            if($sender instanceof Player) {
+                $this->plugin->getFormManager()->createMainMenuForm($sender);
+                return true;
+            }
             $sender->sendMessage(TextFormat::AQUA.'Specify an action: SECRET, IDENTITY, DIAGNOSE, CMD, CMDO, LINK');
             return true;
         }
+
         switch(strtoupper($args[0])) {
             
             case 'IDENTITY':
@@ -77,9 +85,10 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                         $i = 0;
                         $color = true;
                         $sender->sendMessage(TextFormat::YELLOW.'cmd, these run instantly:');
-                        foreach($this->plugin->cmds as $cmd) {
+                        foreach($this->plugin->onVote as $onVote) {
                             $i++;
-                            $sender->sendMessage(($color ? TextFormat::WHITE : TextFormat::GRAY).$i.'. /'.$cmd);
+                            if($onVote['player-online']) continue;
+                            $sender->sendMessage(($color ? TextFormat::WHITE : TextFormat::GRAY).$i.'. /'.$onVote['cmd']);
                         }
                         break;
                     
@@ -88,27 +97,36 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                             $sender->sendMessage(TextFormat::RED.'You need to specify a command to add.');
                             return true;
                         }
+                        if($this->plugin->lock) {
+                            $sender->sendMessage(TextFormat::RED.'This command has been locked.');
+                            return true;
+                        }
                         unset($args[0], $args[1]);
                         if(strpos($args[2], '/') === 0) $args[2] = substr($args[2], 1, strlen($args[2]));
-                        $this->plugin->cmds[] = implode(' ', $args);
+                        $this->plugin->onVote[] = ['cmd' => implode(' ', $args), 'player-online' => false];
                         $sender->sendMessage(TextFormat::GREEN.'Successfully added command.');
-                        $this->plugin->getConfig()->setNested('onvote.run-cmd', array_values($this->plugin->cmds));
+                        $this->plugin->getConfig()->set('onvote', array_values($this->plugin->onVote));
                         $this->plugin->saveConfig();
                         break;
 
                     case 'REMOVE':
-                        if(count($args) < 3 or !is_numeric($args[2])) {
+                        if(count($args) < 3 || !is_numeric($args[2])) {
                             $sender->sendMessage(TextFormat::RED.'You need to specify the ID of the command to remove.');
                             return true;
                         }
+                        if($this->plugin->lock) {
+                            $sender->sendMessage(TextFormat::RED.'This command has been locked.');
+                            return true;
+                        }
                         $i = 0;
-                        foreach($this->plugin->cmds as $key => $cmd) {
+                        foreach($this->plugin->onVote as $key => $onVote) {
                             $i++;
+                            if($onVote['player-online']) continue;
                             if((int) $args[2] > $i) continue;
                             if((int) $args[2] === $i) {
-                                unset($this->plugin->cmds[$key]);
-                                $sender->sendMessage(TextFormat::GREEN.'Deleted '.$cmd.'.');
-                                $this->plugin->getConfig()->setNested('onvote.run-cmd', array_values($this->plugin->cmds));
+                                unset($this->plugin->onVote[$key]);
+                                $sender->sendMessage(TextFormat::GREEN.'Deleted '.$onVote['cmd'].'.');
+                                $this->plugin->getConfig()->set('onvote', array_values($this->plugin->onVote));
                                 $this->plugin->saveConfig();
                                 return true;
                             }
@@ -131,9 +149,10 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                         $i = 0;
                         $color = true;
                         $sender->sendMessage(TextFormat::YELLOW.'cmdo, these run when the player is online:');
-                        foreach($this->plugin->cmdos as $cmd) {
+                        foreach($this->plugin->onVote as $onVote) {
                             $i++;
-                            $sender->sendMessage(($color ? TextFormat::WHITE : TextFormat::GRAY).$i.'. /'.$cmd);
+                            if(!$onVote['player-online']) continue;
+                            $sender->sendMessage(($color ? TextFormat::WHITE : TextFormat::GRAY).$i.'. /'.$onVote['cmd']);
                         }
                         break;
 
@@ -144,25 +163,25 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                         }
                         unset($args[0], $args[1]);
                         if(strpos($args[2], '/') === 0) $args[2] = substr($args[2], 1, strlen($args[2]));
-                        $this->plugin->cmdos[] = implode(' ', $args);
+                        $this->plugin->onVote[] = ['cmd' => implode(' ', $args), 'player-online' => true];
                         $sender->sendMessage(TextFormat::GREEN.'Successfully added command.');
-                        $this->plugin->getConfig()->setNested('onvote.online-cmd', array_values($this->plugin->cmdos));
+                        $this->plugin->getConfig()->set('onvote', array_values($this->plugin->onVote));
                         $this->plugin->saveConfig();
                         break;
 
                     case 'REMOVE':
-                        if(count($args) < 3 or !is_numeric($args[2])) {
+                        if(count($args) < 3 || !is_numeric($args[2])) {
                             $sender->sendMessage(TextFormat::RED.'You need to specify the ID of the command to remove.');
                             return true;
                         }
                         $i = 0;
-                        foreach($this->plugin->cmdos as $key => $cmd) {
+                        foreach($this->plugin->onVote as $key => $onVote) {
                             $i++;
                             if((int) $args[2] > $i) continue;
                             if((int) $args[2] === $i) {
-                                unset($this->plugin->cmdos[$key]);
-                                $sender->sendMessage(TextFormat::GREEN.'Deleted '.$cmd.'.');
-                                $this->plugin->getConfig()->setNested('onvote.online-cmd', array_values($this->plugin->cmdos));
+                                unset($this->plugin->onVote[$key]);
+                                $sender->sendMessage(TextFormat::GREEN.'Deleted '.$onVote['cmd'].'.');
+                                $this->plugin->getConfig()->set('onvote', array_values($this->plugin->onVote));
                                 $this->plugin->saveConfig();
                                 return true;
                             }

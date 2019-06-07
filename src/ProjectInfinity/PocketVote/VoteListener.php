@@ -25,24 +25,27 @@ class VoteListener implements Listener {
      * @priority LOWEST
      * @param VoteEvent $event
      */
-    public function onVoteEvent(VoteEvent $event) {
+    public function onVoteEvent(VoteEvent $event): void {
         if($event->isCancelled()) return;
 
+        $isPlayerOnline = $this->plugin->getServer()->getPlayer($event->getPlayer()) === null;
+        $hasOnlineCommands = false;
         $sender = new ConsoleCommandSender();
-        foreach($this->plugin->cmds as $cmd) {
-            $cmd = str_replace(['%player', '%ip', '%site'], [$event->getPlayer(), $event->getIp(), $event->getSite()], $cmd);
+
+        foreach($this->plugin->onVote as $onVote) {
+            if(!$isPlayerOnline && $onVote['player-online']) {
+                $hasOnlineCommands = true;
+                continue;
+            }
+
+            $cmd = str_replace(['%player', '%ip', '%site'], [$event->getPlayer(), $event->getIp(), $event->getSite()], $onVote['cmd']);
             $this->plugin->getServer()->dispatchCommand($sender, $cmd);
         }
         
-        if($this->plugin->getServer()->getPlayer($event->getPlayer()) === null) {
+        if(!$isPlayerOnline && $hasOnlineCommands) {
             $this->vm->addVote($event->getPlayer(), $event->getSite(), $event->getIp());
             $this->vm->commit();
             return;
-        }
-
-        foreach($this->plugin->cmdos as $cmd) {
-            $cmd = str_replace(['%player', '%ip', '%site'], [$event->getPlayer(), $event->getIp(), $event->getSite()], $cmd);
-            $this->plugin->getServer()->dispatchCommand($sender, $cmd);
         }
         
     }
@@ -51,7 +54,7 @@ class VoteListener implements Listener {
      * @priority LOWEST
      * @param PlayerJoinEvent $event
      */
-    public function onPlayerJoin(PlayerJoinEvent $event) {
+    public function onPlayerJoin(PlayerJoinEvent $event): void {
         // Check if identity and secret has been set. If not show GUI.
         if($this->plugin->identity === '' && $this->plugin->secret === '' && $event->getPlayer()->isOp()) {
             $form = new CustomForm(static function(Player $player, ?array $data) {
@@ -90,8 +93,9 @@ class VoteListener implements Listener {
             $voteDispatchEvent->call();
 
             # Iterate all commands.
-            foreach($this->plugin->cmdos as $cmd) {
-                $cmd = str_replace(['%player', '%ip', '%site'], [$vote['player'], $vote['ip'], $vote['site']], $cmd);
+            foreach($this->plugin->onVote as $onVote) {
+                if(!$onVote['player-online']) continue;
+                $cmd = str_replace(['%player', '%ip', '%site'], [$vote['player'], $vote['ip'], $vote['site']], $onVote['cmd']);
                 $this->plugin->getServer()->dispatchCommand($sender, $cmd);
             }
             $this->vm->removeVote($key);

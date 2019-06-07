@@ -5,15 +5,9 @@ namespace ProjectInfinity\PocketVote;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\TaskHandler;
 use pocketmine\utils\TextFormat;
-use ProjectInfinity\PocketVote\cmd\guru\GuAddCommand;
-use ProjectInfinity\PocketVote\cmd\guru\GuDelCommand;
-use ProjectInfinity\PocketVote\cmd\guru\GuListCommand;
-use ProjectInfinity\PocketVote\cmd\guru\GuruCommand;
-use ProjectInfinity\PocketVote\cmd\PocketVoteCommand;
-use ProjectInfinity\PocketVote\cmd\VoteCommand;
-use ProjectInfinity\PocketVote\task\HeartbeatTask;
-use ProjectInfinity\PocketVote\task\SchedulerTask;
-use ProjectInfinity\PocketVote\task\VoteLinkTask;
+use ProjectInfinity\PocketVote\cmd\guru\{GuAddCommand, GuDelCommand, GuListCommand, GuruCommand};
+use ProjectInfinity\PocketVote\cmd\{PocketVoteCommand, VoteCommand};
+use ProjectInfinity\PocketVote\task\{HeartbeatTask, SchedulerTask, VoteLinkTask};
 use ProjectInfinity\PocketVote\util\{VoteManager, FormManager};
 
 class PocketVote extends PluginBase {
@@ -26,8 +20,7 @@ class PocketVote extends PluginBase {
     public $secret;
     public $expiration;
 
-    public $cmds;
-    public $cmdos;
+    public $onVote;
     
     public static $cert;
     public static $dev;
@@ -85,8 +78,8 @@ class PocketVote extends PluginBase {
 
         $this->identity = $this->getConfig()->get('identity', null);
         $this->secret = $this->getConfig()->get('secret', null);
-        $this->cmds = $this->getConfig()->getNested('onvote.run-cmd', []);
-        $this->cmdos = $this->getConfig()->getNested('onvote.online-cmd', []);
+
+        $this->onVote = $this->getConfig()->get('onvote', []);
         $this->lock = $this->getConfig()->get('lock', false);
         $this->expiration = 86400 * $this->getConfig()->get('vote-expiration', 7);
         $this->voteManager = new VoteManager($this);
@@ -133,7 +126,7 @@ class PocketVote extends PluginBase {
         self::$plugin = null;
         self::$cert = null;
         self::$dev = null;
-        unset($this->identity, $this->secret, $this->voteManager, $this->cmds, $this->cmdos, $this->expiration);
+        unset($this->identity, $this->secret, $this->voteManager, $this->onVote, $this->expiration);
     }
     
     public static function getPlugin(): PocketVote {
@@ -216,6 +209,30 @@ class PocketVote extends PluginBase {
             $this->saveConfig();
         }
         unset($currentVersion);
+        if($this->getConfig()->get('version', 0) === 6) {
+            $this->getLogger()->info(TextFormat::YELLOW.'Migrating config to version 7.');
+            // Migrates commands to "objects" instead of a list.
+            $cmds = $this->getConfig()->getNested('onvote.run-cmd', []);
+            $cmdos = $this->getConfig()->getNested('onvote.online-cmd', []);
+            $newCmds = [];
+
+            foreach($cmds as $cmd) {
+                $newCmds[] = ['cmd' => $cmd, 'player-online' => false];
+            }
+
+            foreach($cmdos as $cmd) {
+                $newCmds[] = ['cmd' => $cmd, 'player-online' => true];
+            }
+
+            $this->getConfig()->set('onvote', array_values($newCmds));
+            $this->getConfig()->set('version', 7);
+            $this->saveConfig();
+        }
+    }
+
+    public function saveCommands(): void {
+        $this->getConfig()->set('onvote', array_values($this->onVote));
+        $this->saveConfig();
     }
 
 }
