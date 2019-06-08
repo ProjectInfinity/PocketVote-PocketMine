@@ -46,7 +46,15 @@ class PocketVote extends PluginBase {
         $this->saveDefaultConfig();
         $this->updateConfig();
         self::$dev = $this->getConfig()->get('dev', false) === true;
-        
+
+        if(!file_exists($this->getDataFolder().'top_voters.json')) {
+            $fp = fopen($this->getDataFolder().'top_voters.json', 'wb');
+            fwrite($fp, json_encode($this->topVoters));
+            fclose($fp);
+        }
+
+        $this->topVoters = json_decode(file_get_contents($this->getDataFolder().'top_voters.json'), true);
+
         # Save and load certificates.
         self::$cert = $this->getDataFolder().'cacert.pem';
         if(!file_exists(self::$cert)) {
@@ -128,6 +136,10 @@ class PocketVote extends PluginBase {
     }
 
     public function onDisable(): void {
+        $fp = fopen($this->getDataFolder().'top_voters.json', 'wb');
+        fwrite($fp, json_encode($this->topVoters));
+        fclose($fp);
+
         $this->getScheduler()->cancelAllTasks();
         self::$plugin = null;
         self::$cert = null;

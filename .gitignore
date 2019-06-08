@@ -47,3 +47,5 @@ fabric.properties
 cacert.pem
 /config.yml
 vrc/
+
+top_voters\.json
