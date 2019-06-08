@@ -10,17 +10,16 @@ use ProjectInfinity\PocketVote\PocketVote;
 
 class TopVoterTask extends AsyncTask {
 
-    public $isDev, $cert, $player, $identity, $version;
+    public $isDev, $cert, $identity, $version;
 
-    public function __construct($identity, $player) {
-        $this->player = $player;
+    public function __construct($identity) {
         $this->identity = $identity;
         $this->isDev = PocketVote::$dev;
         $this->cert = PocketVote::$cert;
         $this->version = PocketVote::getPlugin()->getDescription()->getVersion();
     }
 
-    public function onRun() {
+    public function onRun(): void {
         $curl = curl_init($this->isDev ? 'http://127.0.0.1/v2/top/10' : 'https://api.pocketvote.io/v2/top/10');
 
         curl_setopt_array($curl, [
@@ -44,46 +43,35 @@ class TopVoterTask extends AsyncTask {
         }
 
         curl_close($curl);
-        $this->setResult(json_decode($res));
+        $this->setResult(json_decode($res, true));
     }
 
-    public function onCompletion(Server $server) {
-        $player = $this->player === 'CONSOLE' ? new ConsoleCommandSender() : $server->getPlayer($this->player);
-        if($player === null) return;
-
+    public function onCompletion(Server $server): void {
         if(!$this->hasResult()) {
-            $player->sendMessage(TextFormat::RED.'Failed to retrieve top voters. Try again later.');
+            $server->getLogger()->error('[PocketVote] TopVoterTask - Failed to retrieve top voters. Try again later.');
             return;
         }
 
         $result = $this->getResult();
 
-        if(!$result->success && isset($result->error)) {
-            $player->sendMessage(TextFormat::RED.'An error occurred while contacting the PocketVote servers, please try again later.');
-            $server->getLogger()->error('[PocketVote] curl error occurred during TopVoterTask: '.$result->error);
+        if(!$result['success'] && isset($result['error'])) {
+            $server->getLogger()->error('[PocketVote] TopVoterTask - An error occurred while contacting the PocketVote servers, please try again later.');
+            $server->getLogger()->error('[PocketVote] curl error occurred during TopVoterTask: '.$result['error']);
             return;
         }
 
-        if(!$result->success) {
-            $player->sendMessage(TextFormat::RED.'An error occurred while contacting the PocketVote servers, please try again later.');
+        if(!$result['success']) {
+            $server->getLogger()->error('[PocketVote] TopVoterTask - An error occurred while contacting the PocketVote servers, please try again later.');
             return;
         }
 
-        $player->sendMessage(TextFormat::AQUA.'### Current top 10 voters ###');
-        $rank = 1;
-        $color = true;
-
-        if(!isset($result->payload)) {
-            $player->sendMessage(TextFormat::RED.'Error! No payload.');
+        if(!isset($result['payload'])) {
+            $server->getLogger()->error('[PocketVote] TopVoterTask - Error! No payload.');
             return;
         }
 
-        foreach($result->payload as $voter) {
-            $player->sendMessage(($color ? TextFormat::WHITE : TextFormat::GRAY).$rank.'. '.$voter->player.' ('.$voter->votes.')');
-            $rank++;
-            $color = !$color;
-        }
+        if(count($result['payload']) === 0) return;
 
-        if(count($result->payload) === 0) $player->sendMessage(TextFormat::GRAY.'No voters found, start voting!');
+        PocketVote::getPlugin()->setTopVoters($result['payload']);
     }
 }

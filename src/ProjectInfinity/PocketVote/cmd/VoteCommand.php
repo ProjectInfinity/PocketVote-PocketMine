@@ -8,7 +8,6 @@ use pocketmine\command\PluginIdentifiableCommand;
 use pocketmine\plugin\Plugin;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
-use ProjectInfinity\PocketVote\task\TopVoterTask;
 
 class VoteCommand extends Command implements PluginIdentifiableCommand {
 
@@ -24,10 +23,28 @@ class VoteCommand extends Command implements PluginIdentifiableCommand {
             $sender->sendMessage(TextFormat::RED.'You do not have permission use /vote.');
             return true;
         }
+
         if(isset($args[0]) && strtoupper($args[0]) === 'TOP') {
-            $this->plugin->getServer()->getAsyncPool()->submitTask(new TopVoterTask($this->plugin->identity, $sender->getName()));
+            $topVoters = $this->plugin->getTopVoters();
+
+            if(count($topVoters) === 0) {
+                $sender->sendMessage(TextFormat::GRAY.'No voters found, start voting!');
+                return true;
+            }
+
+            $sender->sendMessage(TextFormat::AQUA.'### Current top 10 voters ###');
+            $rank = 1;
+            $color = true;
+
+            foreach($topVoters as $voter) {
+                $sender->sendMessage(($color ? TextFormat::WHITE : TextFormat::GRAY).$rank.'. '.$voter['player'].' ('.$voter['votes'].')');
+                $rank++;
+                $color = !$color;
+            }
+
             return true;
         }
+
         $link = $this->plugin->getVoteManager()->getVoteLink();
         if($link === null) {
             if($sender->hasPermission('pocketvote.admin')) {

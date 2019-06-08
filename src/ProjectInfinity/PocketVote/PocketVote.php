@@ -5,6 +5,7 @@ namespace ProjectInfinity\PocketVote;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\TaskHandler;
 use pocketmine\utils\TextFormat;
+use ProjectInfinity\PocketVote\api\PocketVoteAPI;
 use ProjectInfinity\PocketVote\cmd\guru\{GuAddCommand, GuDelCommand, GuListCommand, GuruCommand};
 use ProjectInfinity\PocketVote\cmd\{PocketVoteCommand, VoteCommand};
 use ProjectInfinity\PocketVote\task\{HeartbeatTask, SchedulerTask, VoteLinkTask};
@@ -14,6 +15,7 @@ class PocketVote extends PluginBase {
 
     /** @var PocketVote $plugin */
     private static $plugin;
+    private static $api;
 
     public $lock;
     public $identity;
@@ -36,6 +38,8 @@ class PocketVote extends PluginBase {
     private $schedulerTask;
     private $schedulerTs;
     private $schedulerFreq = 60;
+
+    private $topVoters = [];
 
     public function onEnable(): void {
         self::$plugin = $this;
@@ -114,11 +118,13 @@ class PocketVote extends PluginBase {
             }
         }
 
-        $this->schedulerTask = $this->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 1200); # 1200 ticks = 60 seconds.
+        $this->schedulerTask = $this->getScheduler()->scheduleRepeatingTask(new SchedulerTask($this), 800); # 800 ticks = 40 seconds.
         # Get voting link.
         $this->getServer()->getAsyncPool()->submitTask(new VoteLinkTask($this->identity));
         # Report usage.
         if(!$this->getConfig()->get('opt-out-usage', false)) $this->getServer()->getAsyncPool()->submitTask(new HeartbeatTask($this->identity));
+
+        self::$api = new PocketVoteAPI($this);
     }
 
     public function onDisable(): void {
@@ -126,7 +132,8 @@ class PocketVote extends PluginBase {
         self::$plugin = null;
         self::$cert = null;
         self::$dev = null;
-        unset($this->identity, $this->secret, $this->voteManager, $this->onVote, $this->expiration);
+        self::$api = null;
+        unset($this->identity, $this->secret, $this->voteManager, $this->onVote, $this->expiration, $this->topVoters);
     }
     
     public static function getPlugin(): PocketVote {
@@ -233,6 +240,18 @@ class PocketVote extends PluginBase {
     public function saveCommands(): void {
         $this->getConfig()->set('onvote', array_values($this->onVote));
         $this->saveConfig();
+    }
+
+    public function getTopVoters(): array {
+        return $this->topVoters;
+    }
+
+    public function setTopVoters(array $topVoters): void {
+        $this->topVoters = $topVoters;
+    }
+
+    public static function getAPI(): PocketVoteAPI {
+        return self::$api;
     }
 
 }
