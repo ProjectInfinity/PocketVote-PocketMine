@@ -28,7 +28,7 @@ class VoteListener implements Listener {
     public function onVoteEvent(VoteEvent $event): void {
         if($event->isCancelled()) return;
 
-        $isPlayerOnline = $this->plugin->getServer()->getPlayer($event->getPlayer()) === null;
+        $isPlayerOnline = $this->plugin->getServer()->getPlayer($event->getPlayer()) !== null;
         $hasOnlineCommands = false;
         $sender = new ConsoleCommandSender();
 
@@ -39,6 +39,12 @@ class VoteListener implements Listener {
             }
 
             $cmd = str_replace(['%player', '%ip', '%site'], [$event->getPlayer(), $event->getIp(), $event->getSite()], $onVote['cmd']);
+
+            if($isPlayerOnline && isset($onVote['permission'])) {
+                $player = $this->plugin->getServer()->getPlayer($event->getPlayer());
+                if(!$player || !$player->hasPermission($onVote['permission'])) continue;
+            }
+
             $this->plugin->getServer()->dispatchCommand($sender, $cmd);
         }
         
@@ -96,6 +102,8 @@ class VoteListener implements Listener {
             foreach($this->plugin->onVote as $onVote) {
                 if(!$onVote['player-online']) continue;
                 $cmd = str_replace(['%player', '%ip', '%site'], [$vote['player'], $vote['ip'], $vote['site']], $onVote['cmd']);
+
+                if(isset($onVote['permission']) && !$event->getPlayer()->hasPermission($onVote['permission'])) continue;
                 $this->plugin->getServer()->dispatchCommand($sender, $cmd);
             }
             $this->vm->removeVote($key);

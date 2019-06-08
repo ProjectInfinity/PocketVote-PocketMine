@@ -145,14 +145,21 @@ class FormManager {
         $form->addLabel('Available variables: player, site, ip');
         $form->addInput('Command', 'Command without slash', $onVote['cmd'], 'cmd');
         $form->addLabel('To use a variable prefix it with a percent symbol');
-        $form->addToggle('Requires permission', false, 'enable_permission');
-        $form->addInput('Permission node', 'Enter permission node', null, 'permission');
+        if($type === 'instant') {
+            $form->addToggle('Requires permission', false, 'enable_permission');
+            $form->addInput('Permission node', 'Enter permission node', null, 'permission');
+        }
         return $form;
     }
 
     private static function createAddCommandForm(): CustomForm {
         $form = new CustomForm(static function(Player $player, ?array $data) {
             if(!$data || !$data['command']) return;
+
+            if($data['uses_permission'] && !$data['online']) {
+                $player->sendMessage(TextFormat::RED.'[PocketVote] Cannot combine permission and running commands when players are offline.');
+                return;
+            }
 
             $plugin = PocketVote::getPlugin();
             $commands = &$plugin->onVote;
