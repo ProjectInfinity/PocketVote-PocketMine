@@ -1,41 +1,41 @@
 # PocketVote for PocketMine
+The best fast, extensible and scalable voting solution for PocketMine servers.
 
-The fully automated voting solution for PocketMine servers.
+PocketVote acts as a smart-funnel for voting. You can use as many voting sites as you want and your server will never communicate with more than PocketVote's servers.
 
-Add your server for free on https://pocketvote.io
-Getting started is super easy!
+Because PocketVote acts as a funnel we're also capable of turning off the stream of votes if your sever goes offline which means no votes are lost!
 
+Are you sold yet? If not here's a short list of some of our features:
+* Automated voting (no commands needed)
+* Your very own https://mcpe.guru vote link that can be managed in-game
+* Run **any** command when a vote is received
+    * Limit commands to users which certain permissions
+    * Choose whether to run command immediately or wait for the player to be online
+* Voting statistics
+* Third-party support through custom events and the PocketVote API
+
+
+Start voting today!
+
+# Table of Contents
+1. [Getting started](#getting-started)
+2. [Commands](COMMANDS.md)
+3. [Permissions](PERMISSIONS.md)
+4. [Configuration](#configuration)
+5. [Developers](#todo)
+6. [Support (Discord)](https://discord.gg/B4WHSSq)
+7. [Plugins with PocketVote support](#third-party-plugins)
+
+#### Getting started
 1. Download the latest version of the plugin from https://poggit.pmmp.io/p/pocketvote
 2. Start your server once after putting the plugin into your plugins directory
 3. Sign up at https://pocketvote.io
 4. Add your server
-5. Click `show secrets`
+5. Click settings and then `show secrets`
 6. Take the information shown and enter it into your `config.yml`, place secret into secret field and identity/identifier in the identity field.
+Since **PocketVote v3.0** you can also do this via the GUI that shows up when a OP logs in while both secret and identity is not set.
 
 
-PocketMine Plugin Documentation
-===============================
-
-This file is continuously updated. If you feel something is missing or
-incorrect, please open an issue.
-
-Commands
-========
-
-| Command                         | Permission       | Description                                                                                                                                                                                                                                                                                                                                   |
-|---------------------------------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| /vote                           | pocketvote.vote  | Shows the MCPE.guru voting link associated with the server.                                                                                                                                                                                                                                                                                   |
-| /vote top                       | pocketvote.vote  | Shows the top voters the past month.                                                                                                                                                                                                                                                                                                          |
-| /pocketvote identity [identity] | pocketvote.admin | This sets your plugin’s identity to the one you provided. Get your server’s identity from the server dashboard at pocketvote.io.                                                                                                                                                                                                              |
-| /pocketvote secret [secret]     | pocketvote.admin | This sets your plugin’s secret to the one you provided. Get your server’s secret from the server dashboard at pocketvote.io.                                                                                                                                                                                                                  |
-| /pocketvote cmd list            | pocketvote.admin | Lists the commands that will run when a player votes.                                                                                                                                                                                                                                                                                         |
-| /pocketvote cmd add [command]   | pocketvote.admin | Adds a command that is ran when a player votes. The following variables can be used in the command and will be replaced by the correct data: **%player**, **%ip** and **%site**. *Note that this command runs immediately as a player votes, regardless of whether they are online or not.*                                                   |
-| /pocketvote cmd remove [id]     | pocketvote.admin | Removes the specified command. Use ‘cmd list’ to find the command id.                                                                                                                                                                                                                                                                         |
-| /pocketvote cmdo list           | pocketvote.admin | Lists the commands that will run when a player votes and is online.                                                                                                                                                                                                                                                                           |
-| /pocketvote cmdo add [command]  | pocketvote.admin | Adds a command that is ran when a player votes and is online. The following variables can be used in the command and will be replaced by the correct data: **%player**, **%ip** and **%site**. *Note that this command runs only when the player is online! If they are not online while voting this command will not run until they log on.* |
-| /pocketvote cmdo remove [id]    | pocketvote.admin | Removes the specified command. Use ‘cmdo list’ to find the command id.                                                                                                                                                                                                                                                                        |
-| /pocketvote link [name]         | pocketvote.admin | Attempts to set your MCPE.guru link to the provided name. Your link will look something like this mcpe.guru/[name].                                                                                                                                                                                                                           |
-| TODO: MCPE.guru commands!       |                  |                                                                                                                                                                                                                                                                                                                                               |
 
 Configuration
 =============
@@ -47,6 +47,12 @@ Configuration
 | secret                      | The secret given to you from [PocketVote.io](https://pocketvote.io) which is given to voting sites.                                                                                                                                                        |
 | lock                        | If set to true, the commands to alter secret or identity is disabled.                                                                                                                                                                                      |
 | vote-expiration             | An amount of time to keep votes that have not been redeemed by a player, specified in **days**.                                                                                                                                                            |
-| onvote.run-cmd              | A list of commands that are to be ran immediately as a vote is retrieved. The following variables can be used in the commands: %player, %site, %ip.                                                                                                        |
-| onvote.online-cmd           | A list of commands that are to be ran as soon as the target player is online. The following variables can be used in the commands: %player, %site, %ip.                                                                                                    |
+| onvote                      | A list of commands that are to be ran when a vote is retrieved. The following variables can be used in the commands: %player, %site, %ip.                                                                                                        |
 | votes                       | A list of votes waiting for players to log on. Please leave this alone.                                                                                                                                                                                    |
+
+Third party plugins
+===================
+Made a plugin that supports PocketVote? [Let me know! Open an issue on GitHub](https://github.com/ProjectInfinity/PocketVote-PocketMine/issues/new).
+
+* [PocketLotto](https://poggit.pmmp.io/p/PocketLotto) - A lottery plugin for PocketMine with support for PocketVote.
+* [TopVoter (as of next version)](https://poggit.pmmp.io/p/topvoter) - A plugin that lists top voters using FloatingTextParticles.
