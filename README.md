@@ -22,7 +22,7 @@ Start voting today!
 2. [Commands](COMMANDS.md)
 3. [Permissions](PERMISSIONS.md)
 4. [Configuration](#configuration)
-5. [Developers](#todo)
+5. [Developers](DEVELOPERS.md)
 6. [Support (Discord)](https://discord.gg/B4WHSSq)
 7. [Plugins with PocketVote support](#third-party-plugins)
 
