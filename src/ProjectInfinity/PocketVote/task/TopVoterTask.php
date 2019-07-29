@@ -65,12 +65,15 @@ class TopVoterTask extends AsyncTask {
             return;
         }
 
-        if(!isset($result['payload'])) {
+        if(!array_key_exists('payload', $result)) {
             $server->getLogger()->error('[PocketVote] TopVoterTask - Error! No payload.');
             return;
         }
 
-        if(count($result['payload']) === 0) return;
+        if(!$result['payload'] || count($result['payload']) === 0) {
+            PocketVote::getPlugin()->setTopVoters([]);
+            return;
+        }
 
         PocketVote::getPlugin()->setTopVoters($result['payload']);
     }
