@@ -8,4 +8,5 @@ onvote:
   - cmd: tell %player Thanks for voting at %site!
     player-online: true
   - cmd: say Thanks for voting for us at %site, %player!
+    player-online: false
 votes: []
