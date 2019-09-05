@@ -53,6 +53,10 @@ class TopVoterTask extends AsyncTask {
         }
 
         $result = $this->getResult();
+        if(!$result) {
+            $server->getLogger()->error('[PocketVote] TopVoterTask - There were no result. This might be an issue with PocketMine, if it keeps happening please report it to me!');
+            return;
+        }
 
         if(!$result['success'] && isset($result['error'])) {
             $server->getLogger()->error('[PocketVote] TopVoterTask - An error occurred while contacting the PocketVote servers, please try again later.');
