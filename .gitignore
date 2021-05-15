@@ -49,3 +49,5 @@ cacert.pem
 vrc/
 
 top_voters\.json
+
+/lib

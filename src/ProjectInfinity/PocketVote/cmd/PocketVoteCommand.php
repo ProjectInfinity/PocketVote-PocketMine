@@ -89,6 +89,7 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
                             $i++;
                             if($onVote['player-online']) continue;
                             $sender->sendMessage(($color ? TextFormat::WHITE : TextFormat::GRAY).$i.'. /'.$onVote['cmd']);
+                            $color = !$color;
                         }
                         break;
                     
