@@ -211,7 +211,7 @@ class JWT
      * @param string|resource   $key        For HS*, a string key works. for RS*, must be a resource of an openssl public key
      * @param string            $alg        The algorithm
      *
-     * @return bool
+     * @return bool|string
      *
      * @throws DomainException Invalid Algorithm or OpenSSL failure
      */
