@@ -61,7 +61,7 @@ class PocketVote extends PluginBase {
 
             $this->getLogger()->warning('Could not find cacert.pem, downloading it now.');
 
-            $curl = curl_init('https://curl.haxx.se/ca/cacert.pem');
+            $curl = curl_init('https://curl.se/ca/cacert.pem');
 
             /** @noinspection CurlSslServerSpoofingInspection */
             curl_setopt_array($curl, [
