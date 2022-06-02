@@ -122,7 +122,7 @@ class VoteCheckTask extends AsyncTask {
             return;
         }
 
-        # Set meta.
+        // Set meta.
         PocketVote::getPlugin()->startScheduler($result->getMeta()->frequency ?? 60);
 
         if($result->hasError()) {
