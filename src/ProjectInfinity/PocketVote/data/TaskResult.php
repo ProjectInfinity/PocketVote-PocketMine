@@ -12,10 +12,7 @@ class TaskResult {
         $this->votes = $votes;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasError() {
+    public function hasError(): bool {
         return $this->error;
     }
 
@@ -27,17 +24,11 @@ class TaskResult {
         $this->errorData = $errorData;
     }
 
-    /**
-     * @return array
-     */
     public function getError() {
         return $this->errorData;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasVotes() {
+    public function hasVotes(): bool {
         return count($this->votes) > 0;
     }
 
@@ -45,10 +36,7 @@ class TaskResult {
         $this->votes = $votes;
     }
 
-    /**
-     * @return array
-     */
-    public function getVotes() {
+    public function getVotes(): array {
         return $this->votes;
     }
 

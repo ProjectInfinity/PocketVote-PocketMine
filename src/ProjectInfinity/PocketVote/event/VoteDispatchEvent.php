@@ -3,11 +3,12 @@
 namespace ProjectInfinity\PocketVote\event;
 
 use pocketmine\event\Cancellable;
+use pocketmine\event\CancellableTrait;
 use pocketmine\event\plugin\PluginEvent;
-use pocketmine\Server;
 use ProjectInfinity\PocketVote\PocketVote;
 
 class VoteDispatchEvent extends PluginEvent implements Cancellable {
+    use CancellableTrait;
 
     public static $handlerList = null;
 

@@ -26,7 +26,7 @@ class VoteCheckTask extends AsyncTask {
         $this->cert = PocketVote::$cert;
     }
 
-    public function onRun() {
+    public function onRun(): void {
         $curl = curl_init($this->isDev ? 'http://127.0.0.1/v2/check' : 'https://api.pocketvote.io/v2/check');
 
         curl_setopt_array($curl, [
@@ -108,8 +108,8 @@ class VoteCheckTask extends AsyncTask {
         return $r;
     }
     
-    public function onCompletion(Server $server) {
-
+    public function onCompletion(): void {
+        $server = Server::getInstance();
         if(!$this->hasResult()) {
             $server->getLogger()->emergency('A request finished without a response from the API. It may have failed to be sent.');
             return;
@@ -131,13 +131,7 @@ class VoteCheckTask extends AsyncTask {
         }
 
         foreach($result->getVotes() as $key => $vote) {
-            Server::getInstance()->getPluginManager()->callEvent(
-                new VoteEvent(PocketVote::getPlugin(),
-                    $vote->player,
-                    $vote->ip,
-                    $vote->site
-                )
-            );
+            (new VoteEvent(PocketVote::getPlugin(), $vote->player, $vote->ip, $vote->site))->call();
         }
     }
 }

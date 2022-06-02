@@ -4,12 +4,14 @@ namespace ProjectInfinity\PocketVote\cmd;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\PluginIdentifiableCommand;
 use pocketmine\plugin\Plugin;
+use pocketmine\plugin\PluginOwned;
+use pocketmine\plugin\PluginOwnedTrait;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
 
-class VoteCommand extends Command implements PluginIdentifiableCommand {
+class VoteCommand extends Command implements PluginOwned {
+    use PluginOwnedTrait;
 
     private $plugin;
 
@@ -18,7 +20,7 @@ class VoteCommand extends Command implements PluginIdentifiableCommand {
         $this->plugin = $plugin;
     }
 
-    public function execute(CommandSender $sender, String $commandLabel, array $args) {
+    public function execute(CommandSender $sender, String $commandLabel, array $args): bool {
         if(!$sender->hasPermission('pocketvote.vote')) {
             $sender->sendMessage(TextFormat::RED.'You do not have permission use /vote.');
             return true;

@@ -12,7 +12,7 @@ class GuruCommand extends Command {
         parent::__construct('guru', 'MCPE Guru help command', '/guru', ['gu']);
     }
 
-    public function execute(CommandSender $sender, String $commandLabel, array $args) {
+    public function execute(CommandSender $sender, String $commandLabel, array $args): bool {
         if(!$sender->hasPermission('pocketvote.admin')) {
             $sender->sendMessage(TextFormat::RED.'You do not have permission to do that.');
             return true;

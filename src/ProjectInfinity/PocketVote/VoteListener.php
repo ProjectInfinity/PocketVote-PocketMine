@@ -3,10 +3,11 @@
 namespace ProjectInfinity\PocketVote;
 
 use jojoe77777\FormAPI\CustomForm;
-use pocketmine\command\ConsoleCommandSender;
+use pocketmine\console\ConsoleCommandSender;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerJoinEvent;
-use pocketmine\Player;
+use pocketmine\player\Player;
+use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\event\VoteDispatchEvent;
 use ProjectInfinity\PocketVote\event\VoteEvent;
@@ -28,9 +29,9 @@ class VoteListener implements Listener {
     public function onVoteEvent(VoteEvent $event): void {
         if($event->isCancelled()) return;
 
-        $isPlayerOnline = $this->plugin->getServer()->getPlayer($event->getPlayer()) !== null;
+        $isPlayerOnline = $event->isOnline();
         $hasOnlineCommands = false;
-        $sender = new ConsoleCommandSender();
+        $sender = new ConsoleCommandSender($this->plugin->getServer(), $this->plugin->getServer()->getLanguage());
 
         foreach($this->plugin->onVote as $onVote) {
             if(!$isPlayerOnline && $onVote['player-online']) {
@@ -41,8 +42,12 @@ class VoteListener implements Listener {
             $cmd = str_replace(['%player', '%ip', '%site'], [$event->getPlayer(), $event->getIp(), $event->getSite()], $onVote['cmd']);
 
             if($isPlayerOnline && isset($onVote['permission'])) {
-                $player = $this->plugin->getServer()->getPlayer($event->getPlayer());
-                if(!$player || !$player->hasPermission($onVote['permission'])) continue;
+                foreach($this->plugin->getServer()->getOnlinePlayers() as $player) {
+                    if(strtolower($event->getPlayer()) !== strtolower($player->getName())) continue;
+                    if(!$player->hasPermission($onVote['permission'])) continue;
+                    // Found player with permission, execute command.
+                    break;
+                }
             }
 
             $this->plugin->getServer()->dispatchCommand($sender, $cmd);
@@ -62,7 +67,7 @@ class VoteListener implements Listener {
      */
     public function onPlayerJoin(PlayerJoinEvent $event): void {
         // Check if identity and secret has been set. If not show GUI.
-        if($this->plugin->identity === '' && $this->plugin->secret === '' && $event->getPlayer()->isOp()) {
+        if($this->plugin->identity === '' && $this->plugin->secret === '' && $this->plugin->getServer()->isOp($event->getPlayer()->getName())) {
             $form = new CustomForm(static function(Player $player, ?array $data) {
                 if(!$data) {
                     $player->sendMessage(TextFormat::YELLOW.'[PocketVote] OK! We\'ll remind you next time you log in.');
@@ -89,7 +94,7 @@ class VoteListener implements Listener {
         if(PocketVote::$hasVRC) $this->vm->scheduleVRCTask($event->getPlayer()->getName()); # TODO: This should be possible to disable and only allow through commands.
         if(!$this->vm->hasVotes($event->getPlayer()->getName())) return;
 
-        $sender = new ConsoleCommandSender();
+        $sender = new ConsoleCommandSender($this->plugin->getServer(), $this->plugin->getServer()->getLanguage());
         foreach($this->vm->getVotes($event->getPlayer()->getName()) as $key => $vote) {
             if($this->plugin->expiration > 0 && (time() >= $vote['expires'])) {
                 $this->vm->removeVote($key);

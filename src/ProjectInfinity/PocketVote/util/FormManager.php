@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace ProjectInfinity\PocketVote\util;
 
 use jojoe77777\FormAPI\{CustomForm, ModalForm, SimpleForm};
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
 

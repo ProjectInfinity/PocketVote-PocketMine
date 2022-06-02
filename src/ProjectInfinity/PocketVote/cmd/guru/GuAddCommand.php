@@ -4,8 +4,8 @@ namespace ProjectInfinity\PocketVote\cmd\guru;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\ConsoleCommandSender;
-use pocketmine\Player;
+use pocketmine\console\ConsoleCommandSender;
+use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
 use ProjectInfinity\PocketVote\task\guru\AddLinkTask;

@@ -3,11 +3,13 @@
 namespace ProjectInfinity\PocketVote\event;
 
 use pocketmine\event\Cancellable;
+use pocketmine\event\CancellableTrait;
 use pocketmine\event\plugin\PluginEvent;
 use pocketmine\Server;
 use ProjectInfinity\PocketVote\PocketVote;
 
 class VoteEvent extends PluginEvent implements Cancellable {
+    use CancellableTrait;
 
     public static $handlerList = null;
 
@@ -54,7 +56,12 @@ class VoteEvent extends PluginEvent implements Cancellable {
      * @return bool
      */
     public function isOnline(): bool {
-        return Server::getInstance()->getPlayer($this->player) !== null;    
+        foreach(Server::getInstance()->getOnlinePlayers() as $player) {
+            if(strtolower($player->getName()) === strtolower($this->player)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

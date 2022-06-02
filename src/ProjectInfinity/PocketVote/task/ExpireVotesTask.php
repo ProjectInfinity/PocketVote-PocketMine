@@ -7,7 +7,7 @@ use ProjectInfinity\PocketVote\PocketVote;
 
 class ExpireVotesTask extends Task {
 
-    public function onRun(int $currentTick) {
+    public function onRun(): void {
         PocketVote::getPlugin()->getLogger()->debug('Cleaning up expired votes.');
         PocketVote::getPlugin()->getVoteManager()->expireVotes();
     }

@@ -4,16 +4,17 @@ namespace ProjectInfinity\PocketVote\cmd;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\PluginIdentifiableCommand;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\plugin\Plugin;
+use pocketmine\plugin\PluginOwned;
+use pocketmine\plugin\PluginOwnedTrait;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\PocketVote;
 use ProjectInfinity\PocketVote\task\guru\SetLinkNameTask;
 use ProjectInfinity\PocketVote\task\DiagnoseTask;
-use ProjectInfinity\PocketVote\util\FormManager;
 
-class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
+class PocketVoteCommand extends Command implements PluginOwned {
+    use PluginOwnedTrait;
 
     private $plugin;
 
@@ -22,7 +23,7 @@ class PocketVoteCommand extends Command implements PluginIdentifiableCommand {
         $this->plugin = $plugin;
     }
 
-    public function execute(CommandSender $sender, string $commandLabel, array $args) {
+    public function execute(CommandSender $sender, string $commandLabel, array $args): bool {
         if(!$sender->hasPermission('pocketvote.admin')) {
             $sender->sendMessage(TextFormat::RED.'You do not have permission to administer PocketVote.');
             return true;

@@ -51,3 +51,5 @@ vrc/
 top_voters\.json
 
 /lib
+
+.DS_Store

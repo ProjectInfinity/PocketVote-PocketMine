@@ -2,7 +2,6 @@
 
 namespace ProjectInfinity\PocketVote\task;
 
-use pocketmine\command\ConsoleCommandSender;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -46,7 +45,8 @@ class TopVoterTask extends AsyncTask {
         $this->setResult(json_decode($res, true));
     }
 
-    public function onCompletion(Server $server): void {
+    public function onCompletion(): void {
+        $server = Server::getInstance();
         if(!$this->hasResult()) {
             $server->getLogger()->error('[PocketVote] TopVoterTask - Failed to retrieve top voters. Try again later.');
             return;

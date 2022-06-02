@@ -18,7 +18,7 @@ class VRCCheckTask extends AsyncTask {
         $this->cert = PocketVote::$cert;
     }
 
-    public function onRun() {
+    public function onRun(): void {
         $results = [];
         foreach($this->vrcs as $vrc) {
             $curl = curl_init(str_replace('{USERNAME}', $this->player, $vrc->check));
@@ -130,7 +130,8 @@ class VRCCheckTask extends AsyncTask {
         return $r;
     }
 
-    public function onCompletion(Server $server) {
+    public function onCompletion(): void {
+        $server = Server::getInstance();
         if(!$this->hasResult()) {
             $server->getLogger()->emergency('A VRC task finished without a result. This should never happen.');
             return;
@@ -150,13 +151,8 @@ class VRCCheckTask extends AsyncTask {
                 return;
             }
             $vote = (object) $result->getVotes();
-            $server->getPluginManager()->callEvent(
-                new VoteEvent(PocketVote::getPlugin(),
-                    $vote->player,
-                    $vote->ip,
-                    $vote->site
-                )
-            );
+            $event = new VoteEvent(PocketVote::getPlugin(), $vote->player, $vote->ip, $vote->site);
+            $event->call();
         }
 
         # Removes task from the array that prevents duplicate tasks.

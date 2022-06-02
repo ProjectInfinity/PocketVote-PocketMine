@@ -2,7 +2,7 @@
 
 namespace ProjectInfinity\PocketVote\task\guru;
 
-use pocketmine\command\ConsoleCommandSender;
+use pocketmine\console\ConsoleCommandSender;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use ProjectInfinity\PocketVote\lib\Firebase\JWT;
@@ -46,8 +46,9 @@ class AddLinkTask extends GuruTask {
         }
     }
 
-    public function onCompletion(Server $server) {
-        $player = $this->player === 'CONSOLE' ? new ConsoleCommandSender() : $server->getPlayer($this->player);
+    public function onCompletion(): void {
+        $server = Server::getInstance();
+        $player = $this->player === 'CONSOLE' ? new ConsoleCommandSender($server, $server->getLanguage()) : $server->getPlayerExact($this->player);
 
         if($player === null) return;
 
