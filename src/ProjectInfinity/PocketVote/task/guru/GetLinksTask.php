@@ -24,8 +24,8 @@ class GetLinksTask extends GuruTask {
     }
 
     public function onCompletion(): void {
-        if($this->player === 'CONSOLE') {
-            $this->player->sendMessage(TextFormat::RED.'Console cannot manage links.');
+        if($this->player == 'CONSOLE') {
+            Server::getInstance()->getLogger()->info(TextFormat::RED.'You cannot use this command from the console.');
             return;
         }
         $server = Server::getInstance();

@@ -13,9 +13,9 @@ class GuruTask extends AsyncTask {
     public $version;
     public $url;
     public $method;
-    public $postFields;
+    public array $postFields;
 
-    public function __construct($url, $method = 'GET', $postFields = null) {
+    public function __construct($url, $method = 'GET', $postFields = []) {
         $this->url = $url;
         $this->isDev = PocketVote::$dev;
         $this->cert = PocketVote::$cert;
@@ -43,7 +43,7 @@ class GuruTask extends AsyncTask {
         switch($this->method) {
             case 'POST':
                 $options[CURLOPT_POST] = 1;
-                if($this->postFields !== null) $options[CURLOPT_POSTFIELDS] = $this->postFields;
+                if($this->postFields !== null) $options[CURLOPT_POSTFIELDS] = (array) $this->postFields;
                 break;
 
             case 'DELETE':
