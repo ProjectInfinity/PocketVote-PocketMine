@@ -53,6 +53,6 @@ Configuration
 Third party plugins
 ===================
 Made a plugin that supports PocketVote? [Let me know! Open an issue on GitHub](https://github.com/ProjectInfinity/PocketVote-PocketMine/issues/new).
-
+* [VoteStreak](https://github.com/antbag-dev/VoteStreak)
 * [PocketLotto](https://poggit.pmmp.io/p/PocketLotto) - A lottery plugin for PocketMine with support for PocketVote.
 * [TopVoter (as of next version)](https://poggit.pmmp.io/p/topvoter) - A plugin that lists top voters using FloatingTextParticles.
